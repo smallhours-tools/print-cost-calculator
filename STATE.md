@@ -1,5 +1,7 @@
 # STATE
 
+Venture-wide notes, backlog and digest live in the private smallhours-tools/hq repo.
+
 ## NEEDS_OWNER
 - Enable GitHub Pages (Settings → Pages → Source: GitHub Actions) if not done yet. Scaffold PR #1 is merged.
 - Enable private vulnerability reporting in repo settings (SECURITY.md points to it).
