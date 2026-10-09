@@ -3,15 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>3D Print Cost Calculator – reads your slicer file | Small Hours</title>
-  <meta name="description" content="Free 3D print cost calculator. Drop in a G-code or 3MF file to read filament weight and print time, then get material, electricity, labor and fee costs. Runs in your browser.">
+  <meta name="description" content="Free 3D print cost calculator. Drop in a G-code or 3MF file to read filament weight and print time, then get material, electricity, wear, labor and fee costs. Runs in your browser.">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/">
   <meta property="og:title" content="3D Print Cost Calculator">
   <meta property="og:description" content="Drop in a slicer file, get the real cost of a 3D print. Free, private, runs in your browser.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/">
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.55 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} h1{margin:.3em 0} h2{margin-top:1.8em}
+    fieldset{border:1px solid var(--bd);border-radius:8px;margin:1rem 0;padding:1rem;background:var(--card)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.8rem}
+    label{display:flex;flex-direction:column;font-size:.9rem;color:var(--mut)}
+    input{font:inherit;padding:.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);min-height:2.75rem}
+    input:focus-visible,button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+    #drop{border:2px dashed var(--bd);border-radius:10px;padding:1.5rem;text-align:center;background:var(--card)}
+    #drop.over{border-color:var(--acc)}
+    table{width:100%;border-collapse:collapse} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right}
+    #price{font-size:2rem;font-weight:700} button{font:inherit;padding:.5rem 1rem;min-height:2.75rem}
+    details{border-bottom:1px solid var(--bd);padding:.6rem 0} summary{cursor:pointer;font-weight:600}
+  </style>
 </head>
 <body>
-  <main id="app"><h1>3D Print Cost Calculator</h1><p>Coming together – see the repository for progress.</p></main>
-  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool.</p></footer>
-  <script type="module" src="/src/main.ts"></script>
+  <header><a href="../">&larr; Small Hours</a></header>
+  <main id="app">
+    <h1>3D Print Cost Calculator</h1>
+    <p>Drop in a G-code or 3MF file and get the real cost of a print: material, electricity, printer wear, labor, marketplace fees and a suggested price. Free, and everything happens in your browser. Files never leave your device.</p>
+    <div id="drop">
+      <label for="file">Choose a .gcode or .3mf file, or drop it here</label>
+      <input id="file" type="file" accept=".gcode,.gco,.3mf,.bgcode,text/plain">
+      <p id="file-status" role="status" aria-live="polite">Or skip this and enter weight and time manually below.</p>
+    </div>
+    <form id="calc" onsubmit="return false">
+      <fieldset class="grid"><legend>This print</legend>
+        <label>Filament weight (g)<input id="f-weightG" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Print time: hours<input id="f-hours" type="number" min="0" step="1" value="0" inputmode="numeric"></label>
+        <label>Print time: minutes<input id="f-mins" type="number" min="0" step="1" value="0" inputmode="numeric"></label>
+        <input id="f-printTimeHours" type="hidden" value="0">
+      </fieldset>
+      <fieldset class="grid"><legend>Your costs (saved in this browser only)</legend>
+        <label>Currency symbol<input id="f-currency" maxlength="4" value="$"></label>
+        <label>Filament price per kg<input id="f-filamentPricePerKg" type="number" min="0" step="0.01" inputmode="decimal"></label>
+<label>Waste / purge / failures (%)<input id="f-wastePct" type="number" min="0" step="0.1" inputmode="decimal"></label>
+<label>Printer average power (W)<input id="f-printerPowerW" type="number" min="0" step="1" inputmode="decimal"></label>
+<label>Electricity price per kWh<input id="f-electricityPerKwh" type="number" min="0" step="0.001" inputmode="decimal"></label>
+<label>Printer purchase price<input id="f-printerCost" type="number" min="0" step="1" inputmode="decimal"></label>
+<label>Printer lifetime (print hours)<input id="f-printerLifetimeHours" type="number" min="0" step="100" inputmode="decimal"></label>
+<label>Maintenance per print hour<input id="f-maintenancePerHour" type="number" min="0" step="0.01" inputmode="decimal"></label>
+<label>Labor time (minutes)<input id="f-laborMinutes" type="number" min="0" step="1" inputmode="decimal"></label>
+<label>Labor rate per hour<input id="f-laborPerHour" type="number" min="0" step="0.5" inputmode="decimal"></label>
+<label>Target profit margin (% of price)<input id="f-marginPct" type="number" min="0" step="1" inputmode="decimal"></label>
+<label>Marketplace fee (%)<input id="f-feePct" type="number" min="0" step="0.1" inputmode="decimal"></label>
+<label>Fixed fee per order<input id="f-feeFixed" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      </fieldset>
+    </form>
+    <section aria-labelledby="res"><h2 id="res">Result</h2>
+      <p>Suggested price: <span id="price">0.00</span></p>
+      <table><tbody id="breakdown"></tbody></table>
+      <p><button id="reset" type="button">Reset saved settings</button></p>
+    </section>
+    <section><h2>How the cost is worked out</h2>
+      <p>Material = weight &times; price per kg, plus a waste allowance. Electricity = average power &times; hours &times; tariff. Wear = printer price divided by its lifetime hours, plus maintenance per hour. Labor = your time &times; your rate. The suggested price is set so that after marketplace fees you keep your target margin of the selling price.</p>
+      <p>Weight and time are read from the slicer's own metadata (Bambu Studio / OrcaSlicer 3MF and G-code, PrusaSlicer, Cura). Multiple filaments are summed. If a file has no weight, it is estimated from filament length and the result says so.</p>
+    </section>
+    <section><h2>FAQ</h2>
+      <details><summary>Is my file uploaded anywhere?</summary><p>No. The file is read by JavaScript in your browser and never sent over the network. There is no backend and no tracking.</p></details>
+      <details><summary>Which files work?</summary><p>G-code from PrusaSlicer, OrcaSlicer, Bambu Studio and Cura, and sliced .3mf files from Bambu Studio / OrcaSlicer. If yours is not recognised, enter weight and time by hand.</p></details>
+      <details><summary>What should I put for printer power?</summary><p>Average draw while printing, not the peak heater rating. 100 to 150 W is typical for an enclosed hobby printer. A plug-in energy meter gives the true number.</p></details>
+      <details><summary>Where are my settings stored?</summary><p>In your browser's localStorage on this device. Use the reset button to clear them.</p></details>
+      <details><summary>Is it free?</summary><p>Yes, and open source under the MIT licence.</p></details>
+    </section>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No tracking, no ads.</p></footer>
+  <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
