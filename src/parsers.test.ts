@@ -101,6 +101,14 @@ describe('gcode', () => {
     expect(r.totalWeightG).toBe(12.34);
     expect(r.printTimeSeconds).toBe(7384);
   });
+  it('Bambu Studio G-code export: total time follows the model time on one line', () => {
+    // Header as written by Bambu Studio 02.08 (P1S profile), sliced from our own test cube.
+    const t = `; HEADER_BLOCK_START\n; BambuStudio 02.08.02.61\n; model printing time: 8m 46s; total estimated time: 8m 47s\n; total layer number: 100\n; total filament weight [g] : 3.74\n; HEADER_BLOCK_END\n`;
+    const r = parseGcodeText(t);
+    expect(r.printTimeSeconds).toBe(527);
+    expect(r.totalWeightG).toBe(3.74);
+    expect(r.warnings).toEqual([]);
+  });
   it('Cura Griffin header (UltiMaker), volume per extruder', () => {
     // Header shape from real Cura 4.6 output for an UltiMaker S5.
     const t = ';START_OF_HEADER\n;FLAVOR:Griffin\n;GENERATOR.NAME:Cura_SteamEngine\n;EXTRUDER_TRAIN.0.MATERIAL.VOLUME_USED:325509\n;EXTRUDER_TRAIN.1.MATERIAL.VOLUME_USED:35500\n;PRINT.TIME:353667\n;END_OF_HEADER\n;Generated with Cura_SteamEngine 4.6.2\nG1 X1\n';

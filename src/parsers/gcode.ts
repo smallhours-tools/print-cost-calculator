@@ -107,7 +107,8 @@ export function parseGcodeText(text: string): ParsedFile {
   if (printTimeSeconds === undefined) {
     const est =
       kv(/^;\s*estimated printing time \(normal mode\)\s*=\s*(.+)$/i) ??
-      kv(/^;\s*total estimated time:\s*(.+?)(?:;|$)/i) ??
+      // Bambu Studio puts it after the model time: "; model printing time: 10m 11s; total estimated time: 10m 12s"
+      kv(/^;.*?\btotal estimated time:\s*(.+?)(?:;|$)/i) ??
       kv(/^;\s*estimated printing time[^=:]*[=:]\s*(.+)$/i);
     if (est) printTimeSeconds = parseDuration(est);
   }
