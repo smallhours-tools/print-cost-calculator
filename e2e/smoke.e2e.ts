@@ -296,6 +296,9 @@ test('implausible numbers in a file get a warning, not silent nonsense (hq t049)
   await page.setInputFiles('#file', file('odd.gcode', gcode(500, '2m 0s')));
   await expect(page.locator('#f-weightG')).toHaveValue('500');
   await expect(page.locator('#file-status')).toContainText('500 g in 2 min is 15000 g per print hour; real prints use about 3 to 80.');
+  expect(errors).toEqual([]);
+});
+
 test('sliced Bambu Studio 3MF shows where the filament goes (hq t040)', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto('/');
