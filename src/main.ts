@@ -71,6 +71,8 @@ async function handleFile(file: File) {
     if (parsed.printTimeSeconds === undefined) bits.push('no print time found: enter it manually');
     status.textContent = [...bits, ...parsed.warnings].join(' · ');
     render();
+    // Pro preview listens for this to preselect saved materials. Only types and weights, never file text beyond them.
+    document.dispatchEvent(new CustomEvent('pcc:parsed', { detail: parsed.filaments.map((f) => ({ type: f.type, weightG: f.weightG })) }));
   } catch (e) {
     const msg = e instanceof Error ? e.message : '';
     // Messages written as full sentences (e.g. "This project hasn't been sliced...") read better on their own.

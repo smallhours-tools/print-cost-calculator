@@ -1,10 +1,11 @@
 // Pro: printer, material and shop libraries for the cost settings, with JSON import/export (hq task t009).
 // Written by an AI agent (Claude). Libraries live in localStorage and pass through the strict importer on every load.
+import type { FilamentUsage } from '../parsers/types';
 import type { ProfileValues } from './profiles';
 import { MAX_IMPORT_BYTES } from './profiles';
 import {
-  emptyLibrary, exportLibrary, importLibrary, removeItem, upsertItem, MATERIAL_KEYS, PRINTER_KEYS, SHOP_KEYS,
-  type Kind, type Library,
+  blendMaterials, emptyLibrary, exportLibrary, importLibrary, removeItem, suggestMaterial, upsertItem, MATERIAL_KEYS,
+  PRINTER_KEYS, SHOP_KEYS, type Kind, type Library, type MaterialItem,
 } from './library';
 
 const STORE = 'pcc.pro.library.v2';
@@ -123,4 +124,27 @@ export function mountProfiles(fieldset: HTMLElement, read: () => ProfileValues, 
     } catch (e) { status.textContent = `Import failed: ${e instanceof Error ? e.message : 'unreadable file'}. Nothing was changed.`; }
   });
   fills.forEach((f) => f());
+
+  // Preselect saved materials from the file's filament types. Several filaments: blend by weight.
+  document.addEventListener('pcc:parsed', (e) => {
+    const filaments = ((e as CustomEvent).detail ?? []) as FilamentUsage[];
+    const slots = filaments.map((f) => ({ weightG: f.weightG, material: suggestMaterial(lib, f) }));
+    const matched = slots.filter((s): s is { weightG: number | undefined; material: MaterialItem } => !!s.material);
+    if (!matched.length) return;
+    const names = [...new Set(matched.map((s) => s.material.name))];
+    const select = box.querySelector<HTMLSelectElement>('#p-material')!;
+    if (names.length === 1) {
+      const m = matched[0].material;
+      picked.materials = m.name; save(); fills[1]();
+      write(m.values);
+      status.textContent = `Matched material "${m.name}" from the file's filament type. Pick another if that's wrong.`;
+      return;
+    }
+    const blend = blendMaterials(slots);
+    if (!blend) return;
+    picked.materials = undefined; save(); fills[1]();
+    select.value = '';
+    write(blend);
+    status.textContent = `Matched ${names.length} materials from the file (${names.map((n) => `"${n}"`).join(', ')}). The material price is their weight-weighted average, with each one's waste included.`;
+  });
 }
