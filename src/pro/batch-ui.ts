@@ -3,6 +3,7 @@
 import { parseFile, type ParsedFile } from '../parsers/index';
 import { priceParsed, toCsv, totals, MAX_BATCH_FILES, type BatchRow } from './batch';
 import type { ProfileValues } from './profiles';
+import { mountQuote } from './quote-ui';
 
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Record<string, unknown> = {}, ...kids: (Node | string)[]): HTMLElementTagNameMap[K] => {
   const e = Object.assign(document.createElement(tag), props);
@@ -34,6 +35,7 @@ export function mountBatch(after: Element, getProfile: () => ProfileValues, getC
     el('p', { className: 'note', textContent: 'Each row is priced as its own item with your settings above (its own labor and fixed fee), then multiplied by quantity.' }),
     picker, status, el('div', { className: 'scroll' }, table), el('p', {}, csv, ' ', clear));
   after.after(section);
+  const quote = mountQuote(section, () => priced, getCurrency);
 
   const toRow = (it: Item): BatchRow => {
     if (it.error && it.weightG === undefined && it.seconds === undefined) return { file: it.file, quantity: it.qty, error: it.error, warnings: [] };
@@ -74,6 +76,7 @@ export function mountBatch(after: Element, getProfile: () => ProfileValues, getC
         el('td', {}, del));
     }));
     table.hidden = csv.hidden = clear.hidden = items.length === 0;
+    quote.setVisible(items.length > 0);
     refresh();
   }
 
