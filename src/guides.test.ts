@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { DEFAULTS } from './cost';
+import { computeCost, DEFAULTS } from './cost';
 import { parseGcodeText } from './parsers/gcode';
 import { parseSliceInfo } from './parsers/threemf';
 
@@ -238,5 +238,37 @@ describe('infill guide', () => {
     expect(html).toContain(`most at ${Math.round(share(top[0], 2) * 100)}%, the calicat figure ${Math.round(share(top[1], 2) * 100)}%`);
     expect(ref.filter((r) => share(r, 0) === Math.max(...[0, 1, 2, 3].map((i) => share(r, i)))).length).toBe(4);
     expect(html).toContain('biggest share in 4 of the 7 files');
+  });
+});
+
+describe('failed prints guide', () => {
+  // Written by an AI agent (Claude): every figure recomputes from computeCost with the defaults on the
+  // pricing guide's real file (62.10 g, 26707 s), so a change to DEFAULTS or the model fails here (hq t037).
+  const html = text('failed-prints-cost');
+  const base = { ...DEFAULTS, weightG: 62.1, printTimeHours: 26707 / 3600 };
+  const c = computeCost(base);
+  const attempt = c.material + c.electricity + c.wear;
+  const price = (cost: number) => (cost + DEFAULTS.feeFixed) / (1 - DEFAULTS.feePct / 100 - DEFAULTS.marginPct / 100);
+  it('states the per-attempt split', () => {
+    expect(html).toContain(`<strong>${c.material.toFixed(2)}</strong> in material`);
+    expect(html).toContain(`<strong>${(c.electricity + c.wear).toFixed(2)}</strong> in machine time`);
+    expect(html).toContain(`Labor (${c.labor.toFixed(2)}, ${DEFAULTS.laborMinutes} minutes`);
+    expect(price(c.subtotal).toFixed(2)).toBe(c.suggestedPrice.toFixed(2));
+  });
+  it('table recomputes', () => {
+    const t = rows(html).filter((x) => /^\d+%$/.test(x[0]));
+    expect(t).toEqual([0, 5, 10, 20].map((f) => {
+      const a = attempt / (1 - f / 100);
+      return [`${f}%`, (1 / (1 - f / 100)).toFixed(3), a.toFixed(2), (a + c.labor).toFixed(2), price(a + c.labor).toFixed(2)];
+    }));
+  });
+  it('text figures recompute', () => {
+    expect(html).toContain(`adds ${(attempt / 0.9 - attempt).toFixed(2)} to the cost and ${(price(attempt / 0.9 + c.labor) - price(attempt + c.labor)).toFixed(2)} to the price`);
+    const waste = (1 + DEFAULTS.wastePct / 100) / 0.9 - 1;
+    expect(html).toContain(`<strong>${(waste * 100).toFixed(1)}%</strong>`);
+    // Folding failures into waste % gives exactly material ÷ 0.9.
+    expect(computeCost({ ...base, wastePct: waste * 100 }).material).toBeCloseTo(c.material / 0.9, 10);
+    expect(html).toContain(`it is ${((c.electricity + c.wear) * (1 / 0.9 - 1)).toFixed(2)} per good print at 10%`);
+    expect(html).toContain('adding 20% covers 1.2 attempts, but you really need 1.25');
   });
 });
