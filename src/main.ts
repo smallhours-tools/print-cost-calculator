@@ -100,6 +100,11 @@ function init() {
       $('res').parentElement!, read, () => $<HTMLInputElement>('f-currency').value.trim().slice(0, 4),
       (cb) => document.querySelectorAll('#calc input').forEach((el) => el.addEventListener('input', cb)),
     ));
+    import('./pro/profiles-ui').then(({ mountProfiles }) => mountProfiles(
+      input('filamentPricePerKg').closest('fieldset')!, read,
+      // Setting values then firing one input event re-renders the result and the batch table.
+      (v) => { for (const [k, n] of Object.entries(v)) input(k).value = String(n); input('feeFixed').dispatchEvent(new Event('input')); },
+    ));
   }
 }
 init();
