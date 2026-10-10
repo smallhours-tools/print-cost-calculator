@@ -83,3 +83,22 @@ These files carry no print results, so the parser must explain what to do instea
 The OrcaSlicer files exposed a real bug: OrcaSlicer writes **zip64** archives (sizes and offsets in a zip64 extra field), which the zip reader didn't support, so every Orca-written 3MF was rejected. Fixed with zip64 support in src/parsers/zip.ts.
 
 Still missing real samples (synthetic fixtures only): a Bambu Studio / OrcaSlicer project saved **before** slicing (project_settings.config, slice_info without `prediction`) and a Cura project (`Cura/` entries). Finding them needs GitHub code search, so a local session.
+
+## Filament by feature (checked 2026-10-10, hq t036)
+
+Extrusion summed per `;TYPE:` block by `featureLengths()` (src/parsers/features.ts), counting only moves with X/Y.
+Groups: walls = Perimeter + External perimeter + Overhang perimeter; solid = Solid infill + Top solid infill + Bridge infill;
+sparse = Internal infill; other = Skirt/Brim + Custom. Files are the PrusaSlicer ones listed above (all `perimeters = 2`,
+`top_solid_layers = 5`, `bottom_solid_layers = 4`). Reproduce with `REAL_GCODE_DIR=<dir> npx vitest run src/features.test.ts`.
+The sums match each file's own `filament used [mm]` to 0.1 mm, except test_sequential.gcode (+2.1%). The 5-tool
+test_multimaterial.gcode is left out: MMU loading and ramming moves don't add up to its stated totals.
+
+| File | fill_density | Stated (mm) | Walls (mm) | Solid (mm) | Sparse infill (mm) | Other (mm) | Weight (g) |
+|---|---|---|---|---|---|---|---|
+| 3DBenchy.gcode | 15% | 4051.47 | 2260.7 | 1234.7 | 556.1 | 0 | 12.08 |
+| calicat.gcode | 15% | 2224.99 | 1068.5 | 437.9 | 718.7 | 0 | 6.64 |
+| test.gcode | 15% | 4069.40 | 2259.9 | 1220.9 | 549.2 | 39.3 | 10.18 |
+| test_sequential.gcode | 15% | 3734.91 | 1344.8 | 856.6 | 1462.3 | 151.0 | 9.70 |
+| screw.gcode | 5% | 1706.22 | 659.1 | 844.6 | 173.8 | 28.7 | 5.09 |
+| plant-sign.gcode | 5% | 1645.00 | 454.9 | 1141.5 | 0 | 48.6 | 4.91 |
+| vase.gcode | 0% | 2996.07 | 2187.1 | 773.8 | 0 | 35.1 | 8.94 |
