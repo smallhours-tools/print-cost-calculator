@@ -100,9 +100,24 @@ export function parseGcodeText(text: string): ParsedFile {
       if (used.length) filaments.splice(0, filaments.length, ...used);
     }
   }
-  const total = kv(/^;\s*total filament weight \[g\]\s*[:=]\s*([\d.]+)/i);
+  // Bambu Studio G-code: "; total filament weight [g] : 16.27,12.07" lists one value per filament (AMS).
+  // (Its "total filament volume [cm^3]" line is in mm^3 despite the label, so it isn't used.)
+  const total = kv(/^;\s*total filament weight \[g\]\s*[:=]\s*([\d.,;\s]+)$/i);
   if (total !== undefined && !filaments.some((f) => f.weightG !== undefined)) {
-    filaments.push({ weightG: parseFloat(total) });
+    const g = numberList(total);
+    const mm = numberList(kv(/^;\s*total filament length \[mm\]\s*[:=]\s*(.+)$/i) ?? '');
+    const types = typeList ? typeList.split(/[;,]/).map((t) => t.trim()) : [];
+    filaments.length = 0;
+    g.forEach((w, i) => {
+      const f: FilamentUsage = { weightG: w };
+      if (mm.length === g.length) f.lengthMm = mm[i];
+      if (types.length === g.length && types[i]) f.type = types[i];
+      filaments.push(f);
+    });
+    if (filaments.length > 1) {
+      const used = filaments.filter((f) => (f.weightG ?? 0) > 0);
+      if (used.length) filaments.splice(0, filaments.length, ...used);
+    }
   }
 
   if (printTimeSeconds === undefined) {
