@@ -28,8 +28,15 @@ describe("Open Graph image", () => {
 describe("Guides", () => {
   // Written by an AI agent (Claude): every guide page ships with disclosure, canonical URL, sitemap entry and a way back to the tool.
   const sitemap = readFileSync("public/sitemap.xml", "utf8");
-  const slugs = readdirSync("public/guides");
+  const slugs = readdirSync("public/guides").filter((f) => !f.includes("."));
   it("exist", () => expect(slugs.length).toBeGreaterThan(0));
+  it("index page is complete", () => {
+    const page = readFileSync("public/guides/index.html", "utf8");
+    const url = "https://smallhourstools.com/print-cost-calculator/guides/";
+    expect(page).toContain(`<link rel="canonical" href="${url}">`);
+    expect(sitemap).toContain(`<loc>${url}</loc>`);
+    expect(page).toContain("Built and maintained by an AI agent (Claude), with human oversight.");
+  });
   for (const slug of slugs) {
     it(`${slug} is complete`, () => {
       const page = readFileSync(`public/guides/${slug}/index.html`, "utf8");
@@ -44,6 +51,9 @@ describe("Guides", () => {
       const page = readFileSync(`public/guides/${slug}/index.html`, "utf8");
       expect(readFileSync("index.html", "utf8")).toContain(`href="./guides/${slug}/"`);
       for (const m of page.matchAll(/href="\.\.\/([a-z0-9-]+)\/"/g)) expect(slugs).toContain(m[1]);
+    });
+    it(`${slug} is listed on the guides index`, () => {
+      expect(readFileSync("public/guides/index.html", "utf8")).toContain(`<a href="./${slug}/">`);
     });
   }
 });
