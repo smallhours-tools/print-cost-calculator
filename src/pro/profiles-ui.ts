@@ -4,7 +4,7 @@ import type { FilamentUsage } from '../parsers/types';
 import type { ProfileValues } from './profiles';
 import { MAX_IMPORT_BYTES } from './profiles';
 import {
-  blendMaterials, emptyLibrary, exportLibrary, importLibrary, removeItem, suggestMaterial, upsertItem, MATERIAL_KEYS,
+  blendMaterials, emptyLibrary, exportLibrary, importLibrary, removeItem, suggestMaterial, suggestPrinter, upsertItem, MATERIAL_KEYS,
   PRINTER_KEYS, SHOP_KEYS, type Kind, type Library, type MaterialItem,
 } from './library';
 
@@ -124,6 +124,21 @@ export function mountProfiles(fieldset: HTMLElement, read: () => ProfileValues, 
     } catch (e) { status.textContent = `Import failed: ${e instanceof Error ? e.message : 'unreadable file'}. Nothing was changed.`; }
   });
   fills.forEach((f) => f());
+
+  // Preselect a saved printer from the file's printer model or preset name.
+  const printerStatus = mk('p', { className: 'note', id: 'p-printer-matched' });
+  status.before(printerStatus);
+  document.addEventListener('pcc:printer', (e) => {
+    const d = ((e as CustomEvent).detail ?? {}) as { model?: unknown; preset?: unknown };
+    const text = [d.model, d.preset].filter((x): x is string => typeof x === 'string').join(' ');
+    const p = suggestPrinter(lib, text);
+    printerStatus.textContent = '';
+    if (!p) return;
+    picked.printers = p.name; save(); fills[0]();
+    write(p.values);
+    const from = typeof d.model === 'string' && d.model ? ` (file says "${d.model}")` : '';
+    printerStatus.textContent = `Matched printer "${p.name}"${from}. Pick another if that's wrong.`;
+  });
 
   // Preselect saved materials from the file's filament types. Several filaments: blend by weight.
   document.addEventListener('pcc:parsed', (e) => {

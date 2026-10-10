@@ -4,6 +4,8 @@ const MAX_ENTRY_BYTES = 256 * 1024 * 1024; // zip-bomb guard
 
 export interface ZipEntry {
   name: string;
+  /** Uncompressed size as declared by the archive (read() never returns more than this + 1 KB). */
+  size: number;
   read(): Promise<Uint8Array>;
 }
 
@@ -94,6 +96,7 @@ export function listZip(buf: Uint8Array): ZipEntry[] {
     p += 46 + nlen + elen + clen;
     entries.push({
       name,
+      size: usize,
       async read() {
         if (usize > MAX_ENTRY_BYTES) throw new ParseError('Archive entry is too large');
         if (lho + 30 > buf.length || u32(d, lho) !== 0x04034b50) throw new ParseError('Corrupt zip entry');

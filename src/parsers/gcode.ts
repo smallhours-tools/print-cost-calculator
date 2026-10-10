@@ -1,4 +1,5 @@
 import type { FilamentUsage, ParsedFile, Slicer } from './types';
+import { cleanLabel } from './types';
 import { parseDuration } from './time';
 
 const DEFAULT_DIAMETER_MM = 1.75;
@@ -136,7 +137,11 @@ export function parseGcodeText(text: string): ParsedFile {
   if (filaments.length === 0) warnings.push('No filament usage found in this file. Enter it manually.');
   if (printTimeSeconds === undefined) warnings.push('No print time found in this file. Enter it manually.');
 
-  return { slicer, printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), warnings };
+  // Printer: Prusa/Orca/Bambu config lines (Orca also writes ";printer_model:..."), Cura Griffin header.
+  const printerModel = cleanLabel(kv(/^;\s*printer_model\s*[=:]\s*(.+)$/) ?? kv(/^;TARGET_MACHINE\.NAME:\s*(.+)$/));
+  const printerPreset = cleanLabel(kv(/^;\s*printer_settings_id\s*=\s*(.+)$/));
+
+  return { slicer, printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), printerModel, printerPreset, warnings };
 }
 
 export function sumWeights(filaments: FilamentUsage[]): number | undefined {

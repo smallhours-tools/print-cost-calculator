@@ -1,5 +1,5 @@
 import type { FilamentUsage, ParsedFile } from './types';
-import { ParseError } from './types';
+import { ParseError, cleanLabel } from './types';
 import { parseGcodeText, sumWeights } from './gcode';
 import { listZip } from './zip';
 
@@ -40,6 +40,19 @@ export function parseSliceInfo(xml: string): Pick<ParsedFile, 'printTimeSeconds'
   return { printTimeSeconds, filaments, plates };
 }
 
+const MAX_PROJECT_SETTINGS_BYTES = 4 * 1024 * 1024;
+
+/** Printer model and preset from Metadata/project_settings.config (JSON in Bambu Studio / OrcaSlicer 3MFs). */
+export function parseProjectSettings(json: string): Pick<ParsedFile, 'printerModel' | 'printerPreset'> {
+  try {
+    const o = JSON.parse(json) as Record<string, unknown>;
+    if (!o || typeof o !== 'object') return {};
+    return { printerModel: cleanLabel(o.printer_model), printerPreset: cleanLabel(o.printer_settings_id) };
+  } catch {
+    return {};
+  }
+}
+
 export async function parse3mf(bytes: Uint8Array): Promise<ParsedFile> {
   const entries = listZip(bytes);
   const dec = new TextDecoder();
@@ -51,7 +64,9 @@ export async function parse3mf(bytes: Uint8Array): Promise<ParsedFile> {
       if (plates > 1) warnings.push(`This project has ${plates} sliced plates. Time and filament are totals for all of them.`);
       if (!filaments.length) warnings.push('No filament usage found in this file. Enter it manually.');
       if (printTimeSeconds === undefined) warnings.push('No print time found in this file. Enter it manually.');
-      return { slicer: 'bambu', printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), warnings };
+      const settings = entries.find((e) => e.name === 'Metadata/project_settings.config' && e.size <= MAX_PROJECT_SETTINGS_BYTES);
+      const printer = settings ? parseProjectSettings(dec.decode(await settings.read().catch(() => new Uint8Array()))) : {};
+      return { slicer: 'bambu', printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), ...printer, warnings };
     }
   }
   // Bambu/Orca plate G-code, else any G-code in the package (UltiMaker .ufp keeps it at /3D/model.gcode).

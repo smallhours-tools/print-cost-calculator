@@ -40,6 +40,22 @@ Values in the table are what the parser returned; each matched the file's own me
 
 cube_10mm_petg.gcode exposed a bug: its profile has no density, so the slicer wrote `total filament used [g] = 0.00` and we used to report 0 g. The parser now treats 0 g with filament used as missing, ignores densities <= 0, prefers `filament used [cm3]` x density, falls back to the material type's typical density (else PLA), and warns "Your slicer profile has no filament density, so weight is estimated." Note that the same file labels its filament `PLA` although the file name says PETG. We trust the label, giving 0.72 g; at PETG density it would be 0.74 g.
 
+## Printer model (checked 2026-10-10, hq t012)
+
+What the parser reports as `printerModel` / `printerPreset` for the real files above; times and weights were unchanged.
+
+| File | printerModel | printerPreset |
+|---|---|---|
+| 3DBenchy.gcode | MINIIS | Original Prusa MINI & MINI+ Input Shaper - no purge line |
+| test.gcode, test.bgcode | MINI | Original Prusa MINI & MINI+ |
+| cubewithironing.gcode | Elegoo Centauri Carbon | My Elegoo Centauri Carbon 0.4 nozzle - DELTANOPURGE |
+| orcaslicer.gcode | Generic Klipper Printer | MyKlipper 0.4 nozzle |
+| cube_h2c.gcode.3mf | Bambu Lab H2C (from Metadata/project_settings.config) | Bambu Lab H2C 0.4 nozzle |
+| simple.gcode (Cura Griffin) | Ultimaker S5 | none |
+| SimpleCuraTest.gcode, xyzCalibration_cube.gcode (Cura, Marlin) | none (the machine is only inside the `;SETTING_3` blob) | none |
+
+PrusaSlicer's `printer_model` is a short code (MINIIS, MK4S), so the Pro preview matches against the model and the preset name together.
+
 ## Printer power (average while printing)
 
 - Prusa knowledge base FAQ: MK-series about 80 W with PLA, 120 W with ABS, at 26 °C room temperature.

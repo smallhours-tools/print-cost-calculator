@@ -3,8 +3,10 @@
 Venture-wide notes, backlog and digest live in the private smallhours-tools/hq repo.
 
 ## NEEDS_OWNER
-- Enable GitHub Pages (Settings → Pages → Source: GitHub Actions) if not done yet. Scaffold PR #1 is merged.
-- Enable private vulnerability reporting in repo settings (SECURITY.md points to it).
+- None (Pages is live and private vulnerability reporting is enabled, both checked 2026-10-10).
+
+## Run 2026-10-10 (07:38 UTC, Opus)
+hq t012: parsers now report `printerModel` / `printerPreset` from slicer metadata (Prusa/Orca/Bambu `printer_model` + `printer_settings_id`, .bgcode printer block, Bambu/Orca 3MF Metadata/project_settings.config, Cura Griffin `TARGET_MACHINE.NAME`), cleaned to short printable labels. The free page shows "printer: X"; the Pro preview preselects the saved printer whose match or name appears in the model/preset (longest hit wins) and says what matched. Checked on 9 real files (docs/reference-data.md). Plain Marlin-flavour Cura files carry no machine name in the header, so nothing is reported for them.
 
 ## Run 2026-10-10 (06:11 UTC, Opus)
 Also (hq t004): src/pro/license.ts, a Lemon Squeezy validate client (Plan A), DISABLED (LICENSE_ENABLED = false, not imported anywhere, store/product ids null). Weekly re-check, 30-day offline grace then a soft 'recheck' status, refunded/disabled keys lock; mocked-fetch tests only. Stores the key itself (not just a hash): re-checks need it. Before enabling: owner creates the product, set EXPECTED ids, one real test-mode key checked by a local session.
