@@ -40,6 +40,14 @@ export function parseSliceInfo(xml: string): Pick<ParsedFile, 'printTimeSeconds'
   return { printTimeSeconds, filaments, plates };
 }
 
+/**
+ * OrcaSlicer writes Bambu Studio's 3MF layout (even `Application: BambuStudio-…` in 3D/3dmodel.model),
+ * but adds an `OrcaSlicer-Version` header item to slice_info.config. Anything else stays 'bambu'.
+ */
+export function sliceInfoSlicer(xml: string): 'bambu' | 'orca' {
+  return /<header_item\b[^>]*\bkey\s*=\s*"OrcaSlicer-Version"/.test(xml) ? 'orca' : 'bambu';
+}
+
 const MAX_PROJECT_SETTINGS_BYTES = 4 * 1024 * 1024;
 
 /** Printer model and preset from Metadata/project_settings.config (JSON in Bambu Studio / OrcaSlicer 3MFs). */
@@ -58,7 +66,8 @@ export async function parse3mf(bytes: Uint8Array): Promise<ParsedFile> {
   const dec = new TextDecoder();
   const info = entries.find((e) => e.name === 'Metadata/slice_info.config');
   if (info) {
-    const { printTimeSeconds, filaments, plates } = parseSliceInfo(dec.decode(await info.read()));
+    const infoXml = dec.decode(await info.read());
+    const { printTimeSeconds, filaments, plates } = parseSliceInfo(infoXml);
     if (filaments.length || printTimeSeconds !== undefined) {
       const warnings: string[] = [];
       if (plates > 1) warnings.push(`This project has ${plates} sliced plates. Time and filament are totals for all of them.`);
@@ -66,7 +75,7 @@ export async function parse3mf(bytes: Uint8Array): Promise<ParsedFile> {
       if (printTimeSeconds === undefined) warnings.push('No print time found in this file. Enter it manually.');
       const settings = entries.find((e) => e.name === 'Metadata/project_settings.config' && e.size <= MAX_PROJECT_SETTINGS_BYTES);
       const printer = settings ? parseProjectSettings(dec.decode(await settings.read().catch(() => new Uint8Array()))) : {};
-      return { slicer: 'bambu', printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), ...printer, warnings };
+      return { slicer: sliceInfoSlicer(infoXml), printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), ...printer, warnings };
     }
   }
   // Bambu/Orca plate G-code, else any G-code in the package (UltiMaker .ufp keeps it at /3D/model.gcode).

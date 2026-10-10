@@ -40,6 +40,11 @@ Values in the table are what the parser returned; each matched the file's own me
 
 cube_10mm_petg.gcode exposed a bug: its profile has no density, so the slicer wrote `total filament used [g] = 0.00` and we used to report 0 g. The parser now treats 0 g with filament used as missing, ignores densities <= 0, prefers `filament used [cm3]` x density, falls back to the material type's typical density (else PLA), and warns "Your slicer profile has no filament density, so weight is estimated." Note that the same file labels its filament `PLA` although the file name says PETG. We trust the label, giving 0.72 g; at PETG density it would be 0.74 g.
 
+## Our own slicer matrix (2026-10-10, in CI since hq t044)
+`test-corpus/slicer-matrix/` holds our own test models sliced by real PrusaSlicer 2.9.6, Bambu Studio 02.08 and OrcaSlicer 2.4.2 installs (see its README): cube in PLA and PETG, a tiny cube, supports, vase mode, a 21-28 h slab at 100 % infill, unsliced project 3MFs, and for PrusaSlicer .bgcode (also saved under a .gcode name). `manifest.json` records what each slicer stated about its own output. `src/corpus.test.ts` checks every committed file in CI: weight within 0.01 g and time within 1 s of the slicer's numbers, the expected slicer label, and the exact rejection message for project files. All 32 committed files pass; three files over 3 MB (plain G-code of the slabs) are listed but not committed. Not covered yet: multi-material, multi-plate, Cura, Orca forks.
+
+OrcaSlicer writes Bambu Studio's 3MF layout, down to `Application: BambuStudio-…` in 3D/3dmodel.model, so its sliced 3MFs used to be labelled `bambu`. Its slice_info.config carries an `OrcaSlicer-Version` header item, which now sets the label to `orca`.
+
 ## Printer model (checked 2026-10-10, hq t012)
 
 What the parser reports as `printerModel` / `printerPreset` for the real files above; times and weights were unchanged.

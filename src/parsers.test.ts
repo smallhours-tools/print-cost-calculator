@@ -130,6 +130,10 @@ describe('gcode', () => {
 
 describe('3mf', () => {
   const sliceInfo = `<?xml version="1.0"?><config><plate><metadata key="index" value="1"/><metadata key="prediction" value="5400"/><metadata key="weight" value="20.5"/><filament id="1" type="PLA" color="#fff" used_m="5.2" used_g="15.5"/><filament id="2" type="PETG" used_m="1.9" used_g="5.0"/></plate></config>`;
+  it('labels OrcaSlicer 3MFs by the OrcaSlicer-Version header in slice_info.config', async () => {
+    const orca = sliceInfo.replace('<config>', '<config><header><header_item key="X-BBL-Client-Version" value="02.06.00.51"/><header_item key="OrcaSlicer-Version" value="2.4.2"/></header>');
+    expect((await parseFile(makeZip({ 'Metadata/slice_info.config': orca }))).slicer).toBe('orca');
+  });
   it('reads Bambu slice_info.config (deflate)', async () => {
     const r = await parseFile(makeZip({ 'Metadata/slice_info.config': sliceInfo, '3D/3dmodel.model': '<model/>' }));
     expect(r.slicer).toBe('bambu');
