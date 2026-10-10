@@ -1,9 +1,10 @@
 {
  "generated": "2026-10-10",
  "slicers": {
-  "PrusaSlicer": "2.9.6 (MK4S, Prusament PLA/PETG)",
-  "Bambu Studio": "02.08.02.61 (P1S, Bambu PLA Basic / PETG HF)",
-  "OrcaSlicer": "2.4.2 (Creality K1C, Creality Generic PLA/PETG)"
+  "PrusaSlicer": "2.9.6 (MK4S, Prusament PLA/PETG; XL 2T Input Shaper, Prusament PLA + PETG)",
+  "Bambu Studio": "02.08.02.61 (P1S, Bambu PLA Basic / PETG HF; P1S + AMS PLA + PETG)",
+  "OrcaSlicer": "2.4.2 (Creality K1C, Creality Generic PLA/PETG; two PLA colours)",
+  "CuraEngine": "5.13.0 standalone (Creality Ender-3, UltiMaker S5; definitions only, see README)"
  },
  "files": [
   {
@@ -150,6 +151,114 @@
    "reject_message": "This Bambu Studio / OrcaSlicer project hasn't been sliced, so it has no print time or filament use yet. Slice it and save the project, or use File > Export > Export plate sliced file, then drop that in."
   },
   {
+   "file": "B08_ams_pla_petg.gcode.3mf",
+   "case": "B08_ams_pla_petg",
+   "committed": true,
+   "bytes": 77116,
+   "stated_weight_g": 28.33,
+   "stated_time_s": 5927,
+   "expect": "parse",
+   "expect_slicer": "bambu",
+   "reject_message": null,
+   "stated_filament_g": [
+    16.27,
+    12.07
+   ]
+  },
+  {
+   "file": "B08_ams_pla_petg.plate_1.gcode",
+   "case": "B08_ams_pla_petg",
+   "committed": true,
+   "bytes": 526423,
+   "stated_weight_g": 28.34,
+   "stated_time_s": 5927,
+   "expect": "parse",
+   "expect_slicer": "bambu",
+   "reject_message": null,
+   "stated_filament_g": [
+    16.27,
+    12.07
+   ]
+  },
+  {
+   "file": "B09_two_plates.gcode.3mf",
+   "case": "B09_two_plates",
+   "committed": true,
+   "bytes": 85428,
+   "stated_weight_g": 6.96,
+   "stated_time_s": 1453,
+   "expect": "parse",
+   "expect_slicer": "bambu",
+   "reject_message": null,
+   "stated_filament_g": [
+    3.24,
+    3.72
+   ]
+  },
+  {
+   "file": "B09_two_plates.plate_1.gcode",
+   "case": "B09_two_plates",
+   "committed": true,
+   "bytes": 325037,
+   "stated_weight_g": 3.24,
+   "stated_time_s": 907,
+   "expect": "parse",
+   "expect_slicer": "bambu",
+   "reject_message": null
+  },
+  {
+   "file": "B09_two_plates.plate_2.gcode",
+   "case": "B09_two_plates",
+   "committed": true,
+   "bytes": 233866,
+   "stated_weight_g": 3.72,
+   "stated_time_s": 546,
+   "expect": "parse",
+   "expect_slicer": "bambu",
+   "reject_message": null
+  },
+  {
+   "file": "C01_ender3_cube.gcode",
+   "case": "C01_ender3_cube",
+   "committed": true,
+   "bytes": 217898,
+   "stated_weight_g": null,
+   "stated_time_s": 1760,
+   "expect": "parse",
+   "expect_slicer": "cura",
+   "reject_message": null,
+   "stated_length_mm": 1363.08
+  },
+  {
+   "file": "C02_s5_cube.gcode",
+   "case": "C02_s5_cube",
+   "committed": true,
+   "bytes": 190975,
+   "stated_weight_g": null,
+   "stated_time_s": 1871,
+   "expect": "parse",
+   "expect_slicer": "cura",
+   "reject_message": null,
+   "stated_volume_mm3": [
+    3444.0
+   ]
+  },
+  {
+   "file": "C03_s5_dual.gcode",
+   "case": "C03_s5_dual",
+   "committed": true,
+   "bytes": 734601,
+   "stated_weight_g": null,
+   "stated_time_s": 4241,
+   "expect": "parse",
+   "expect_slicer": "cura",
+   "reject_message": null,
+   "stated_volume_mm3": [
+    4045.0,
+    2379.0
+   ]
+  },
+  {
    "file": "O01_cube.gcode.3mf",
    "case": "O01_cube",
    "committed": true,
@@ -293,6 +402,73 @@
    "reject_message": "This Bambu Studio / OrcaSlicer project hasn't been sliced, so it has no print time or filament use yet. Slice it and save the project, or use File > Export > Export plate sliced file, then drop that in."
   },
   {
+   "file": "O08_two_pla.gcode.3mf",
+   "case": "O08_two_pla",
+   "committed": true,
+   "bytes": 61569,
+   "stated_weight_g": 7.08,
+   "stated_time_s": 7021,
+   "expect": "parse",
+   "expect_slicer": "orca",
+   "reject_message": null,
+   "stated_filament_g": [
+    3.5,
+    3.58
+   ]
+  },
+  {
+   "file": "O08_two_pla.plate_1.gcode",
+   "case": "O08_two_pla",
+   "committed": true,
+   "bytes": 792045,
+   "stated_weight_g": 7.08,
+   "stated_time_s": 7021,
+   "expect": "parse",
+   "expect_slicer": "orca",
+   "reject_message": null,
+   "stated_filament_g": [
+    3.5,
+    3.58
+   ]
+  },
+  {
+   "file": "O09_two_plates.gcode.3mf",
+   "case": "O09_two_plates",
+   "committed": true,
+   "bytes": 58855,
+   "stated_weight_g": 6.73,
+   "stated_time_s": 2245,
+   "expect": "parse",
+   "expect_slicer": "orca",
+   "reject_message": null,
+   "stated_filament_g": [
+    3.11,
+    3.62
+   ]
+  },
+  {
+   "file": "O09_two_plates.plate_1.gcode",
+   "case": "O09_two_plates",
+   "committed": true,
+   "bytes": 361281,
+   "stated_weight_g": 3.11,
+   "stated_time_s": 1215,
+   "expect": "parse",
+   "expect_slicer": "orca",
+   "reject_message": null
+  },
+  {
+   "file": "O09_two_plates.plate_2.gcode",
+   "case": "O09_two_plates",
+   "committed": true,
+   "bytes": 238974,
+   "stated_weight_g": 3.62,
+   "stated_time_s": 1030,
+   "expect": "parse",
+   "expect_slicer": "orca",
+   "reject_message": null
+  },
+  {
    "file": "P01_cube_bgcode.bgcode",
    "case": "P01_cube_bgcode",
    "committed": true,
@@ -390,6 +566,36 @@
    "expect": "reject",
    "expect_slicer": null,
    "reject_message": "PrusaSlicer project files don't store print results. Slice it, export G-code (.gcode or .bgcode) and drop that in."
+  },
+  {
+   "file": "P10_xl2t_pla_petg.gcode",
+   "case": "P10_xl2t_pla_petg",
+   "committed": true,
+   "bytes": 327718,
+   "stated_weight_g": 8.29,
+   "stated_time_s": 1219,
+   "expect": "parse",
+   "expect_slicer": "prusa",
+   "reject_message": null,
+   "stated_filament_g": [
+    3.88,
+    4.4
+   ]
+  },
+  {
+   "file": "P11_xl2t_pla_petg_bgcode.bgcode",
+   "case": "P11_xl2t_pla_petg_bgcode",
+   "committed": true,
+   "bytes": 68750,
+   "stated_weight_g": 8.29,
+   "stated_time_s": 1219,
+   "expect": "parse",
+   "expect_slicer": "prusa",
+   "reject_message": null,
+   "stated_filament_g": [
+    3.88,
+    4.4
+   ]
   }
  ]
 }
