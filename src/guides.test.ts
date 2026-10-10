@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 // Written by an AI agent (Claude): recomputes the guides' tables from their own stated inputs, so an arithmetic
@@ -49,4 +49,21 @@ describe('filament guide', () => {
       expect(cells).toEqual([(p / 1000).toFixed(3), ...[10, 50, 100, 250].map((g) => ((p / 1000) * g).toFixed(2))]);
     }
   });
+});
+
+describe('guide structured data', () => {
+  // Written by an AI agent (Claude): Article JSON-LD must say what the page visibly says.
+  const unescape = (s: string) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+  for (const slug of readdirSync('public/guides')) {
+    it(`${slug} has Article JSON-LD matching the page`, () => {
+      const html = text(slug);
+      const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)![1]);
+      expect(ld['@type']).toBe('Article');
+      expect(ld.headline).toBe(unescape(html.match(/<h1>(.*?)<\/h1>/)![1]));
+      expect(ld.description).toBe(unescape(html.match(/<meta name="description" content="([^"]*)">/)![1]));
+      expect(ld.url).toBe(html.match(/<link rel="canonical" href="([^"]+)">/)![1]);
+      expect(ld.publisher.name).toBe('Small Hours');
+      expect(ld.dateModified >= ld.datePublished && /^\d{4}-\d{2}-\d{2}$/.test(ld.dateModified)).toBe(true);
+    });
+  }
 });
