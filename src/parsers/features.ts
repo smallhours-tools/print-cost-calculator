@@ -70,7 +70,8 @@ export class FeatureCounter {
     const semi = raw.indexOf(';');
     const line = (semi === -1 ? raw : raw.slice(0, semi)).trim();
     if (!line) return;
-    const cmd = line.split(/\s+/)[0].toUpperCase();
+    // MeatPack-encoded .bgcode drops spaces ("G1X5E.2"), so take the command letters and digits only.
+    const cmd = (/^[GM]\d+/i.exec(line)?.[0] ?? '').toUpperCase();
     if (cmd === 'M83') this.relative = true;
     else if (cmd === 'M82') this.relative = false;
     else if (cmd === 'G92') {
@@ -117,6 +118,7 @@ export function featureSummary(lengths: Partial<Record<FeatureGroup, number>>, t
   if (!(sum > 0) || !(totalWeightG > 0)) return undefined;
   if (statedLengthMm !== undefined && statedLengthMm > 0 && Math.abs(sum / statedLengthMm - 1) > 0.05) return undefined;
   return entries
+    .filter(([, v]) => v / sum >= 0.005) // a sliver like a 0.1 g purge line would read "0%"
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => `${LABELS[k]} ${(Math.round((totalWeightG * v) / sum * 10) / 10).toFixed(1)} g (${Math.round((100 * v) / sum)}%)`)
     .join(', ');
