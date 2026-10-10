@@ -289,3 +289,12 @@ test('.bgcode shows where the filament goes too (hq t041)', async ({ page }) => 
   await expect(page.locator('#feature-split-text')).toHaveText('walls 6.0 g (75%), sparse infill 2.0 g (25%)');
   expect(errors).toEqual([]);
 });
+
+test('sliced Bambu Studio 3MF shows where the filament goes (hq t040)', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/');
+  await page.setInputFiles('#file', 'test-corpus/slicer-matrix/files/B04_supports.gcode.3mf');
+  await expect(page.locator('#f-weightG')).toHaveValue('7.3');
+  await expect(page.locator('#feature-split-text')).toHaveText(/^supports 4\.2 g \(57%\), walls 1\.5 g/);
+  expect(errors).toEqual([]);
+});

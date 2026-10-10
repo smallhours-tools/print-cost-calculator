@@ -3,6 +3,8 @@
 // pairs don't inflate the totals; on real single-extruder files the sum matches the slicer's own
 // `filament used [mm]`.
 
+import { listZip } from './zip';
+
 export type FeatureGroup = 'walls' | 'solid' | 'sparse' | 'tower' | 'support' | 'other';
 
 const GROUPS: Record<string, FeatureGroup> = {
@@ -12,6 +14,7 @@ const GROUPS: Record<string, FeatureGroup> = {
   'outer wall': 'walls',
   'inner wall': 'walls',
   'overhang wall': 'walls',
+  'floating vertical shell': 'walls',
   'solid infill': 'solid',
   'top solid infill': 'solid',
   'bridge infill': 'solid',
@@ -122,4 +125,19 @@ export function featureSummary(lengths: Partial<Record<FeatureGroup, number>>, t
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => `${LABELS[k]} ${(Math.round((totalWeightG * v) / sum * 10) / 10).toFixed(1)} g (${Math.round((100 * v) / sum)}%)`)
     .join(', ');
+}
+
+/**
+ * Bambu Studio / OrcaSlicer sliced 3MF (hq t040): the G-code sits in Metadata/plate_N.gcode with `; FEATURE:`
+ * comments. Sums every plate, so the total matches slice_info's filament length for multi-plate projects too.
+ * Empty when there is no plate G-code or the plates together are larger than maxBytes.
+ */
+export async function featureLengthsFrom3mf(bytes: Uint8Array, maxBytes: number): Promise<Partial<Record<FeatureGroup, number>>> {
+  const plates = listZip(bytes).filter((e) => /^Metadata\/plate_\d+\.gcode$/.test(e.name));
+  if (!plates.length || plates.reduce((s, e) => s + e.size, 0) > maxBytes) return {};
+  const out: Partial<Record<FeatureGroup, number>> = {};
+  for (const p of plates) {
+    for (const [k, v] of Object.entries(featureLengthsFromBytes(await p.read())) as [FeatureGroup, number][]) out[k] = (out[k] ?? 0) + v;
+  }
+  return out;
 }

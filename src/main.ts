@@ -1,7 +1,7 @@
 import { computeCost, DEFAULTS, perHour, type CostInputs } from './cost';
 import { parseFile, type ParsedFile } from './parsers/index';
 import { isBgcode } from './parsers/bgcode';
-import { featureLengthsFromBytes, featureSummary } from './parsers/features';
+import { featureLengthsFrom3mf, featureLengthsFromBytes, featureSummary } from './parsers/features';
 import { bgcodeFeatureLengths } from './parsers/bgcode-gcode';
 import { jobHash, parseHashJob } from './hash';
 import { powerHint } from './printer-power';
@@ -86,7 +86,7 @@ function showPowerHint(model?: string) {
   };
 }
 
-/** hq t039/t041: per-feature split for single-filament G-code or .bgcode with feature comments; hidden otherwise. */
+/** hq t039/t041/t040: per-feature split for single-filament G-code, .bgcode or sliced Bambu/Orca 3MF with feature comments; hidden otherwise. */
 const FEATURE_MAX_BYTES = 64 * 1024 * 1024;
 let featureRun = 0;
 async function showFeatureSplit(bytes: Uint8Array, parsed: ParsedFile) {
@@ -94,8 +94,10 @@ async function showFeatureSplit(bytes: Uint8Array, parsed: ParsedFile) {
   box.hidden = true;
   const run = ++featureRun;
   const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b;
-  if (isZip || bytes.length > FEATURE_MAX_BYTES || parsed.filaments.length !== 1 || !parsed.totalWeightG) return;
-  const lengths = isBgcode(bytes) ? await bgcodeFeatureLengths(bytes) : featureLengthsFromBytes(bytes);
+  if (bytes.length > FEATURE_MAX_BYTES || parsed.filaments.length !== 1 || !parsed.totalWeightG) return;
+  const lengths = isZip
+    ? await featureLengthsFrom3mf(bytes, FEATURE_MAX_BYTES)
+    : isBgcode(bytes) ? await bgcodeFeatureLengths(bytes) : featureLengthsFromBytes(bytes);
   const line = featureSummary(lengths, parsed.totalWeightG, parsed.filaments[0].lengthMm);
   if (!line || run !== featureRun) return; // nothing to show, or another file was dropped meanwhile
   $('feature-split-text').textContent = line;
