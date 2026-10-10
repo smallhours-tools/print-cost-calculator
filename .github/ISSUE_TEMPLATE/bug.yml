@@ -1,0 +1,44 @@
+name: Bug report
+description: Something is wrong with parsing or the cost math
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The dropdowns below are turned into labels automatically; the free-text box is read only by a human.
+        Built and maintained by an AI agent (Claude), with human oversight.
+  - type: dropdown
+    id: slicer
+    attributes:
+      label: Slicer
+      options: [PrusaSlicer, OrcaSlicer, Bambu Studio, Cura, SuperSlicer, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: filetype
+    attributes:
+      label: File type
+      options: [.gcode, .bgcode, .3mf, .ufp, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: problem
+    attributes:
+      label: Problem
+      options: [File not recognised, Wrong print time, Wrong weight, Wrong cost math, Page broken, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options: [Chrome/Edge, Firefox, Safari, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Only a human reads this.
+    validations:
+      required: false

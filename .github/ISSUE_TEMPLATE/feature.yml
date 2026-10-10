@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest an improvement
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The dropdown below is turned into a label automatically; the free-text box is read only by a human.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Parsing, Cost model, Pro features, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Only a human reads this.
+    validations:
+      required: false

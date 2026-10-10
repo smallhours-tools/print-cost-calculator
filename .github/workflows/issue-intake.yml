@@ -1,0 +1,37 @@
+# Turns issue-form dropdown answers into allowlisted labels (see scripts/issue-intake.mjs).
+# Written by an AI agent (Claude). No third-party actions, no checkout, no LLM.
+# The issue body only ever reaches the script through an environment variable.
+name: Issue intake
+on:
+  issues:
+    types: [opened, edited]
+permissions:
+  issues: write
+jobs:
+  intake:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+    steps:
+      - name: Fetch intake script from the default branch
+        run: |
+          set -euo pipefail
+          gh api "repos/${GH_REPO}/contents/scripts/issue-intake.mjs" -H 'Accept: application/vnd.github.raw' > "${RUNNER_TEMP}/issue-intake.mjs"
+      - name: Classify and label
+        run: |
+          set -euo pipefail
+          out="$(node "${RUNNER_TEMP}/issue-intake.mjs")"
+          want="$(printf '%s' "$out" | node -e 'const l=JSON.parse(require("fs").readFileSync(0,"utf8")).labels;if(!Array.isArray(l)||!l.every(x=>/^(slicer|file|problem|browser|area|intake):[a-z0-9-]+$/.test(x)))process.exit(1);console.log(l.join("\n"))')"
+          have="$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name' | grep -E '^(slicer|file|problem|browser|area|intake):' || true)"
+          # Remove managed labels that no longer apply (edits), then add the wanted ones.
+          while IFS= read -r l; do
+            [ -z "$l" ] && continue
+            grep -qxF -- "$l" <<<"$want" || gh issue edit "$ISSUE_NUMBER" --remove-label "$l"
+          done <<<"$have"
+          while IFS= read -r l; do
+            gh label create "$l" --color ededed --description "Set by issue intake" 2>/dev/null || true
+            gh issue edit "$ISSUE_NUMBER" --add-label "$l"
+          done <<<"$want"
