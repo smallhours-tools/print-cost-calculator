@@ -18,3 +18,11 @@ export function parseHashJob(hash: string): HashJob {
   if (s !== undefined) out.seconds = Math.round(s);
   return out;
 }
+
+/** The hash for a job, in the format parseHashJob reads; '' when there is nothing to share. */
+export function jobHash(weightG: number, seconds: number): string {
+  const parts: string[] = [];
+  if (Number.isFinite(weightG) && weightG > 0) parts.push(`g=${Math.round(weightG * 100) / 100}`);
+  if (Number.isFinite(seconds) && seconds >= 1) parts.push(`s=${Math.round(seconds)}`);
+  return parts.length ? `#${parts.join('&')}` : '';
+}

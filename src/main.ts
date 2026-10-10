@@ -1,6 +1,6 @@
 import { computeCost, DEFAULTS, type CostInputs } from './cost';
 import { parseFile } from './parsers/index';
-import { parseHashJob } from './hash';
+import { jobHash, parseHashJob } from './hash';
 import { powerHint } from './printer-power';
 import { proPreviewEnabled } from './pro/gate';
 
@@ -122,6 +122,20 @@ function init() {
   $('reset').addEventListener('click', () => {
     try { localStorage.removeItem(STORE); localStorage.removeItem(STORE + '.cur'); } catch { /* ignore */ }
     location.reload();
+  });
+  // The link carries only weight and time, never cost settings (see src/hash.ts).
+  $('copy-link').addEventListener('click', async () => {
+    const v = read();
+    const hash = jobHash(v.weightG, v.printTimeHours * 3600);
+    const status = $('copy-status');
+    if (!hash) { status.textContent = 'Enter a weight or time first.'; return; }
+    history.replaceState(null, '', hash);
+    try {
+      await navigator.clipboard.writeText(location.href);
+      status.textContent = 'Link copied (weight and time only, not your settings).';
+    } catch {
+      status.textContent = 'Copy the link from the address bar (weight and time only).';
+    }
   });
   const job = parseHashJob(location.hash);
   if (job.weightG !== undefined) input('weightG').value = String(job.weightG);

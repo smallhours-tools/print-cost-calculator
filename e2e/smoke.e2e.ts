@@ -209,3 +209,22 @@ test('pricing guide links open the calculator with the example job (hq t016)', a
   await expect(page.locator('#f-feePct')).toHaveValue('6.5');
   expect(errors).toEqual([]);
 });
+
+test('copy link to this job carries weight and time only (hq t022)', async ({ page, context }) => {
+  const errors = trackErrors(page);
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Copy link to this job' }).click();
+  await expect(page.locator('#copy-status')).toHaveText('Enter a weight or time first.');
+  await page.fill('#f-weightG', '12.5');
+  await page.fill('#f-hours', '1');
+  await page.fill('#f-mins', '30');
+  await page.fill('#f-feePct', '12');
+  await page.getByRole('button', { name: 'Copy link to this job' }).click();
+  await expect(page.locator('#copy-status')).toContainText('weight and time only');
+  expect(new URL(page.url()).hash).toBe('#g=12.5&s=5400');
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain('#g=12.5&s=5400');
+  expect(copied).not.toContain('fee');
+  expect(errors).toEqual([]);
+});
