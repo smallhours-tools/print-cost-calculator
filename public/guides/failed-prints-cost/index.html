@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>How to price in failed 3D prints (failure rate in your cost)</title>
+  <meta name="description" content="How to build failed prints into the price of a 3D print: divide by the success rate instead of adding a percentage, which costs to count, and a worked example on a real 7-hour PrusaSlicer print at 5, 10 and 20% failure rates.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/failed-prints-cost/">
+  <meta property="og:title" content="How to price in failed 3D prints">
+  <meta property="og:description" content="Divide by the success rate, don’t add a percentage. A worked example on a real 7-hour print at 5, 10 and 20% failure rates.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/failed-prints-cost/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How to price in failed 3D prints", "description": "How to build failed prints into the price of a 3D print: divide by the success rate instead of adding a percentage, which costs to count, and a worked example on a real 7-hour PrusaSlicer print at 5, 10 and 20% failure rates.", "url": "https://smallhourstools.com/print-cost-calculator/guides/failed-prints-cost/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/failed-prints-cost/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    pre{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.85rem} pre:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › <a href="../">Guides</a></header>
+  <main>
+    <h1>How to price in failed 3D prints</h1>
+    <p>Some prints fail: a part comes off the bed, a nozzle clogs, the power blinks. The filament and machine time for those prints are spent either way, so the prints that do succeed have to pay for them. The rule is short: <strong>divide by your success rate, don&rsquo;t add your failure rate.</strong></p>
+
+    <h2>The formula</h2>
+    <p>If a share <em>f</em> of your attempts fail, you need 1 ÷ (1 − <em>f</em>) attempts for every good print. So the cost of the attempt (material and machine time) per good print is:</p>
+    <p><strong>Cost per good print = cost of one attempt ÷ (1 − failure rate)</strong></p>
+    <p>Adding the failure rate as a percentage comes out short, and more so as failures rise: at 20% failures, adding 20% covers 1.2 attempts, but you really need 1.25.</p>
+
+    <h2>Worked example: a real 7-hour print</h2>
+    <p>The same print as in <a href="../how-to-price-3d-prints/">how to price a 3D print</a>: <code>test.bgcode</code> from the PrusaSlicer source repository, <strong>62.10 g</strong> and <strong>7 h 25 min</strong>, with the calculator&rsquo;s default settings. One attempt costs <strong>1.30</strong> in material (with the default 5% waste for purge and trimmed supports) and <strong>1.22</strong> in machine time (electricity, depreciation and maintenance). Labor (2.50, 10 minutes of handling and packing) is spent once per order, so it is left out of the division here.</p>
+    <section class="scroll" aria-label="Cost and price of the example print at different failure rates" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Failure rate</th><th scope="col">Attempts per good print</th><th scope="col">Material + machine</th><th scope="col">Cost with labor</th><th scope="col">Price</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">0%</th><td>1.000</td><td>2.53</td><td>5.03</td><td>8.31</td></tr>
+          <tr><th scope="row">5%</th><td>1.053</td><td>2.66</td><td>5.16</td><td>8.52</td></tr>
+          <tr><th scope="row">10%</th><td>1.111</td><td>2.81</td><td>5.31</td><td>8.75</td></tr>
+          <tr><th scope="row">20%</th><td>1.250</td><td>3.16</td><td>5.66</td><td>9.31</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">Price uses the calculator&rsquo;s defaults: (cost + 0.25 fixed fee) ÷ (1 − 6.5% fee − 30% margin). Amounts are rounded to cents.</p>
+    <p>On this print, going from no failures to 1 in 10 failing adds 0.28 to the cost and 0.44 to the price. That is small next to labor, but it is profit you lose on every sale if you leave it out.</p>
+
+    <h2>Doing it in the calculator</h2>
+    <p>The calculator&rsquo;s waste percentage scales the material line only. To fold failures into it, set waste to (1 + purge waste) ÷ (1 − failure rate) − 1. With 5% purge waste and 10% failures that is <strong>16.7%</strong>. The machine time of the failed attempts is not in that field; on this print it is 0.14 per good print at 10%, so raise your margin a little or add it to the maintenance rate if your failures are frequent.</p>
+
+    <h2>Getting your failure rate right</h2>
+    <ul>
+      <li><strong>Count, don&rsquo;t guess.</strong> Note every attempt for a few weeks: good or failed, and why. Your rate for a proven file on a tuned printer will differ a lot from a new design.</li>
+      <li><strong>Failures usually stop early.</strong> A print that fails at the first layer costs almost nothing; one that fails at 90% costs nearly a full print. If most of yours fail early, the formula overstates the cost, which errs on the safe side.</li>
+      <li><strong>Use a rate per product.</strong> Tall, thin or large parts fail more than small flat ones. Price them with their own rate.</li>
+      <li><strong>Fixing the cause pays twice.</strong> A cleaner bed or a dry spool lowers both your costs and the time you spend reprinting.</li>
+    </ul>
+
+    <div class="cta">
+      <p><strong>Price your own print.</strong> Drop the sliced file into the <a href="../../">free 3D print cost calculator</a> and set the waste percentage from your failure rate. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li><code>test.bgcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a> (PrusaSlicer 2.9.0), read on 10 October 2026.</li>
+      <li>The calculator&rsquo;s default settings, listed in <a href="../how-to-price-3d-prints/">how to price a 3D print</a>. Everything else on this page is arithmetic on those figures.</li>
+    </ul>
+    <p class="note">Checked 10 October 2026. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
