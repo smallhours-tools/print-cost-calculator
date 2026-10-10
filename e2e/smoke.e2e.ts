@@ -82,3 +82,39 @@ test('Pro preview: batch, CSV, hostile names, quote', async ({ page }) => {
   await expect(quote.locator('b, img, script')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test('Pro preview: printer, material and shop libraries', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/?pro');
+  await page.fill('#f-filamentPricePerKg', '30');
+  await page.fill('#p-material-name', 'PETG <img src=x onerror=alert(1)>');
+  await page.click('#p-material-save');
+  await expect(page.locator('#pro-profiles [role=status]')).toContainText('Saved material');
+  await page.fill('#f-printerPowerW', '150');
+  await page.fill('#p-printer-name', 'P1S');
+  await page.click('#p-printer-save');
+
+  // Picking the material restores only material fields.
+  await page.fill('#f-filamentPricePerKg', '15');
+  await page.selectOption('#p-material', '');
+  await page.selectOption('#p-material', { index: 1 });
+  await expect(page.locator('#f-filamentPricePerKg')).toHaveValue('30');
+  await expect(page.locator('#f-printerPowerW')).toHaveValue('150');
+  await expect(page.locator('#pro-profiles img')).toHaveCount(0);
+
+  // Selection and library survive a reload.
+  await page.reload();
+  await expect(page.locator('#p-material option:checked')).toHaveText('PETG <img src=x onerror=alert(1)>');
+  await expect(page.locator('#p-printer option')).toHaveText(['Choose a printer…', 'P1S']);
+
+  // A v1 flat-profile file is split into all three libraries; a bad file changes nothing.
+  const v1 = JSON.stringify({ format: 'smallhours-profiles', version: 1, profiles: [{ name: 'Old', values: { feePct: 6.5 } }] });
+  await page.setInputFiles('#p-import', { name: 'old.json', mimeType: 'application/json', buffer: Buffer.from(v1) });
+  await expect(page.locator('#pro-profiles [role=status]')).toContainText('Imported 3 entries');
+  await expect(page.locator('#p-shop option')).toHaveText(['Choose a shop…', 'Old']);
+  const bad = JSON.stringify({ format: 'smallhours-profiles', version: 2, shops: [{ name: 'X', values: { feePct: -5 } }] });
+  await page.setInputFiles('#p-import', { name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from(bad) });
+  await expect(page.locator('#pro-profiles [role=status]')).toContainText('Nothing was changed');
+  await expect(page.locator('#p-shop option')).toHaveCount(2);
+  expect(errors).toEqual([]);
+});
