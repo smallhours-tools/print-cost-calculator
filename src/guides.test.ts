@@ -181,3 +181,26 @@ describe('cost per print hour guide', () => {
     expect(html).toContain(`costs <strong>${((DEFAULTS.printerPowerW / 1000) * 18.31).toFixed(1)}¢ per hour</strong>`);
   });
 });
+
+describe('multicolor purge waste guide', () => {
+  // Written by an AI agent (Claude): quoted lines parse to the stated total; shares and costs recompute (hq t033).
+  const html = text('multicolor-purge-waste');
+  const tot = 68.66, tower = 47.82, price = 26.99, model = tot - tower;
+  it('quoted footer parses to the per-filament sum', () => {
+    const m = html.match(/<pre tabindex="0" aria-label="PrusaSlicer multi-material G-code footer lines">([\s\S]*?)<\/pre>/)!;
+    const r = parseGcodeText(m[1]);
+    expect(r.filaments.reduce((s, f) => s + (f.weightG ?? 0), 0).toFixed(2)).toBe('68.67');
+    expect(m[1]).toContain(`total filament used for wipe tower [g] = ${tower}`);
+  });
+  it('table and text recompute', () => {
+    const r = rows(html).filter((x) => x[1]?.endsWith(' g'));
+    expect(r.map((x) => x.slice(1))).toEqual([
+      [`${tower.toFixed(2)} g`, `${Math.round((tower / tot) * 100)}%`, ((tower / 1000) * price).toFixed(2)],
+      [`${model.toFixed(2)} g`, `${Math.round((model / tot) * 100)}%`, ((model / 1000) * price).toFixed(2)],
+      [`${tot.toFixed(2)} g`, '100%', ((tot / 1000) * price).toFixed(2)],
+    ]);
+    expect(html).toContain(`spends ${(tower / model).toFixed(1)} g on the wipe tower`);
+    expect(html).toContain(`about ${(0.14 * 1.08).toFixed(2)} g each time`);
+    expect(html).toContain(`not ${model.toFixed(2)} g`);
+  });
+});
