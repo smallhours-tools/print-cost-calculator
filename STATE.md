@@ -6,6 +6,9 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 - Enable GitHub Pages (Settings → Pages → Source: GitHub Actions) if not done yet. Scaffold PR #1 is merged.
 - Enable private vulnerability reporting in repo settings (SECURITY.md points to it).
 
+## Run 2026-10-10 (third)
+Done: Pro batch pricing + CSV export (PR #14) and printable quote renderer (PR #15), both pure logic, merged, not wired to UI. Next: Pro unlock + UI (batch table, profile picker, quote button), then T7 parser samples.
+
 ## Run 2026-10-10
 Done: issue forms + issue-intake workflow (PR #9, awaiting owner merge since it touches .github/); Pro profile store `src/pro/profiles.ts` (PR #10, not wired to UI). Next: Pro batch table, quote page, CSV (see hq playbooks/pro-addon-spec.md).
 
