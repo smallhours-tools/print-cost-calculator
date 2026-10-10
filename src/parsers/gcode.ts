@@ -1,6 +1,7 @@
 import type { FilamentUsage, ParsedFile, Slicer } from './types';
 import { cleanLabel } from './types';
 import { parseDuration } from './time';
+import { implausibleDensity } from './sanity';
 
 const DEFAULT_DIAMETER_MM = 1.75;
 const DEFAULT_DENSITY_G_CM3 = 1.24; // PLA
@@ -133,6 +134,19 @@ export function parseGcodeText(text: string): ParsedFile {
   const dia = diaList ? numberList(diaList) : [];
   const dens = densList ? numberList(densList) : [];
   let noDensity = false;
+  // hq t049: flag stated numbers that contradict each other (never corrected, only reported).
+  const odd = new Set<string>();
+  filaments.forEach((f, i) => {
+    const d = dia[i] ?? dia[0];
+    if (d === undefined || !(f.lengthMm! > 0)) return;
+    const w = f.weightG !== undefined && implausibleDensity(f.weightG, f.lengthMm!, d);
+    if (w) odd.add(w);
+    const area = Math.PI * (d / 2) ** 2;
+    const ratio = f.volumeCm3 !== undefined ? f.volumeCm3 / ((area * f.lengthMm!) / 1000) : 1;
+    if (ratio > 10 || ratio < 0.1)
+      odd.add(`The file's filament volume doesn't match its filament length (off by about ${Math.round(ratio > 1 ? ratio : 1 / ratio)}×; often mm³ written as cm³). Check the weight against your slicer.`);
+  });
+  warnings.push(...odd);
   filaments.forEach((f, i) => {
     const used = (f.lengthMm ?? 0) > 0 || (f.volumeCm3 ?? 0) > 0;
     if (f.weightG === 0 && used) delete f.weightG;
