@@ -79,6 +79,9 @@
       </table>
     </section>
 
+    <h2>Example: a real two-plate print</h2>
+    <p>A Bambu Studio file with two plates (<code>two_plates_h2c.gcode.3mf</code>, from a public test suite) reports <strong>149.85 g</strong> of filament in total. At 20 per kg that is <strong>3.00</strong>, at 30 per kg <strong>4.50</strong>. With a 5% waste allowance: <strong>3.15</strong> and <strong>4.72</strong>. <a href="../../#g=149.85&amp;s=9295">Open this print in the calculator</a> to add electricity, wear, labor and fees with your own rates.</p>
+
     <h2>What people forget</h2>
     <ul>
       <li><strong>Waste.</strong> Purge towers, multi-color flushing, brims, supports and the occasional failed print are paid for too. A 5 to 10 percent allowance is a common starting point; multi-color prints can waste far more.</li>
@@ -92,6 +95,7 @@
 
     <h2>Sources</h2>
     <ul>
+      <li>Example file: <code>two_plates_h2c.gcode.3mf</code> from <a href="https://github.com/MichaelDanCurtis/BambuMate/tree/main/src-tauri/tests/fixtures/slicer">BambuMate test fixtures</a> (Bambu Studio 02.08), read with this calculator's parser: 149.85 g, 9,295 s.</li>
       <li>Bambu Lab filament profiles as shipped in OrcaSlicer: <a href="https://github.com/SoftFever/OrcaSlicer/tree/main/resources/profiles/BBL/filament">resources/profiles/BBL/filament</a> (<code>filament_density</code> in each <code>@base</code> profile; ABS from the generic <code>fdm_filament_abs</code> profile).</li>
       <li>Weight per meter calculated from the nominal 1.75 mm and 2.85 mm diameters.</li>
     </ul>

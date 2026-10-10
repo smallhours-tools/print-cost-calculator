@@ -67,3 +67,16 @@ describe('guide structured data', () => {
     });
   }
 });
+
+describe('filament guide worked example', () => {
+  // Written by an AI agent (Claude): the two-plate example's numbers, recomputed (hq t021).
+  it('matches grams × price, with and without 5% waste', () => {
+    const html = text('filament-cost-per-gram');
+    const g = 149.85;
+    for (const p of [20, 30]) {
+      expect(html).toContain(`<strong>${((g / 1000) * p).toFixed(2)}</strong>`);
+      expect(html).toContain(`<strong>${((g / 1000) * p * 1.05).toFixed(2)}</strong>`);
+    }
+    expect(html).toContain('href="../../#g=149.85&amp;s=9295"');
+  });
+});
