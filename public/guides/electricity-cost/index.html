@@ -21,7 +21,7 @@
     body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
     main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
     a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
-    .scroll{overflow-x:auto} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
     .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
     .note{color:var(--mut);font-size:.9rem}
   </style>
@@ -38,7 +38,7 @@
 
     <h2>Measured average power by printer</h2>
     <p>Figures are the manufacturers' own measurements. Cost uses the US average residential price of <strong>18.31¢ per kWh</strong> (EIA, July 2026).</p>
-    <div class="scroll">
+    <section class="scroll" aria-label="Average power and cost by printer" tabindex="0">
       <table>
         <thead><tr><th scope="col">Printer (material)</th><th scope="col">Average power</th><th scope="col">Per hour</th><th scope="col">10-hour print</th></tr></thead>
         <tbody>
@@ -56,12 +56,12 @@
           <tr><th scope="row">Bambu Lab A1 (ABS)</th><td>200 W</td><td>3.7¢</td><td>36.6¢</td></tr>
         </tbody>
       </table>
-    </div>
+    </section>
     <p class="note">Your printer is not listed? Most enclosed CoreXY machines printing PLA land near 100 W. A plug-in energy meter gives the real number for your machine in one print.</p>
 
     <h2>At your electricity price</h2>
     <p>A handy shortcut: <strong>a 100 W printer running 10 hours uses exactly 1 kWh</strong>, so a 10-hour print costs your price per kWh. The table works in any currency.</p>
-    <div class="scroll">
+    <section class="scroll" aria-label="Cost at different electricity prices" tabindex="0">
       <table>
         <thead><tr><th scope="col">Your price</th><th scope="col">10 h at 80 W</th><th scope="col">10 h at 100 W</th><th scope="col">10 h at 200 W</th></tr></thead>
         <tbody>
@@ -73,7 +73,7 @@
           <tr><th scope="row">0.40 per kWh</th><td>0.32</td><td>0.40</td><td>0.80</td></tr>
         </tbody>
       </table>
-    </div>
+    </section>
 
     <h2>Does electricity matter when pricing prints?</h2>
     <p>Usually a little. As an example, if a 10-hour PLA print uses 100 g of filament from a spool that cost 20 per kg, the material is 2.00 and electricity at 0.18 per kWh is about 0.19, roughly a tenth of the material. Machine wear, failed prints and your own time are usually bigger. It still belongs in the price: across hundreds of print hours a month it adds up, and it matters more for ABS, PC and large high-temperature printers.</p>
