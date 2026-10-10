@@ -20,7 +20,14 @@ export async function inflate(data: Uint8Array, limit: number, format: Compressi
   const chunks: Uint8Array[] = [];
   let size = 0;
   for (;;) {
-    const { done, value } = await reader.read();
+    let r: ReadableStreamReadResult<Uint8Array>;
+    try {
+      r = await reader.read();
+    } catch {
+      // DecompressionStream rejects corrupt data with a bare TypeError; report it like any other unreadable file.
+      throw new ParseError('Corrupt compressed data');
+    }
+    const { done, value } = r;
     if (done) break;
     size += value.length;
     if (size > limit) {

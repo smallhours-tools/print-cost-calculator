@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { deflateRawSync, deflateSync } from 'node:zlib';
-import { parseFile } from './parsers/index';
+import { parseFile, ParseError } from './parsers/index';
 import { parseGcodeText } from './parsers/gcode';
 import { parseDuration } from './parsers/time';
 
@@ -183,6 +183,12 @@ describe('3mf', () => {
   it('still parses a project saved after slicing', async () => {
     const r = await parseFile(makeZip({ 'Metadata/project_settings.config': '{}', 'Metadata/slice_info.config': sliceInfo }));
     expect(r.totalWeightG).toBe(20.5);
+  });
+  it('reports corrupt deflate data as a ParseError (found by fuzzing real files)', async () => {
+    const z = makeZip({ 'Metadata/slice_info.config': sliceInfo });
+    const start = 30 + 'Metadata/slice_info.config'.length; // first entry: local header + name, no extra field
+    z.fill(0xff, start, start + 4); // deflate block type 3 is invalid
+    await expect(parseFile(z)).rejects.toBeInstanceOf(ParseError);
   });
   it('rejects corrupt zips', async () => {
     await expect(parseFile(new Uint8Array([0x50, 0x4b, 1, 2, 3, 4]))).rejects.toThrow();
