@@ -141,7 +141,10 @@ export function parseGcodeText(text: string): ParsedFile {
   const printerModel = cleanLabel(kv(/^;\s*printer_model\s*[=:]\s*(.+)$/) ?? kv(/^;TARGET_MACHINE\.NAME:\s*(.+)$/));
   const printerPreset = cleanLabel(kv(/^;\s*printer_settings_id\s*=\s*(.+)$/));
 
-  return { slicer, printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), printerModel, printerPreset, warnings };
+  // PrusaSlicer/OrcaSlicer: purge filament in the wipe tower, already part of the totals above (hq t035).
+  const tower = parseFloat(kv(/^;\s*total filament used for wipe tower \[g\]\s*[=:]\s*([\d.]+)/i) ?? '');
+  const wipeTowerG = tower > 0 ? tower : undefined;
+  return { slicer, printTimeSeconds, filaments, totalWeightG: sumWeights(filaments), printerModel, printerPreset, wipeTowerG, warnings };
 }
 
 export function sumWeights(filaments: FilamentUsage[]): number | undefined {

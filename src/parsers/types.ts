@@ -21,6 +21,8 @@ export interface ParsedFile {
   printerModel?: string;
   /** Slicer printer preset name, e.g. "Original Prusa MK4S 0.4 nozzle" (cleaned, max 64 chars). */
   printerPreset?: string;
+  /** Grams the slicer says went to the wipe tower (already included in totalWeightG). Multi-material only. */
+  wipeTowerG?: number;
   /** Human-readable notes (never contain file text beyond numbers). */
   warnings: string[];
 }

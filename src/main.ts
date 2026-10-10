@@ -92,6 +92,7 @@ async function handleFile(file: File) {
     setTime(parsed.printTimeSeconds);
     const bits = [`Detected slicer: ${parsed.slicer}`, `${parsed.filaments.length} filament(s)`];
     if (parsed.printerModel) bits.push(`printer: ${parsed.printerModel}`);
+    if (parsed.wipeTowerG !== undefined) bits.push(`${Math.round(parsed.wipeTowerG * 10) / 10} g of it is wipe tower (purge), already counted`);
     if (parsed.totalWeightG === undefined) bits.push('no weight found: enter it manually');
     if (parsed.printTimeSeconds === undefined) bits.push('no print time found: enter it manually');
     status.textContent = [...bits, ...parsed.warnings].join(' · ');
