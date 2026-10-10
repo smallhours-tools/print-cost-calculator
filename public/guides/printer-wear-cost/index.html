@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3D printer wear and depreciation per print hour: work it out from your numbers</title>
+  <meta name="description" content="How to work out the wear cost of a 3D printer per print hour from your own numbers: depreciation over the hours you expect, plus a maintenance allowance for parts you replace, with tables for any printer price.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/printer-wear-cost/">
+  <meta property="og:title" content="3D printer wear and depreciation: what it costs per print hour">
+  <meta property="og:description" content="Depreciation plus maintenance, per print hour, from your own printer price and parts. No made-up lifetimes.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/printer-wear-cost/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "3D printer wear and depreciation: what it costs per print hour", "description": "How to work out the wear cost of a 3D printer per print hour from your own numbers: depreciation over the hours you expect, plus a maintenance allowance for parts you replace, with tables for any printer price.", "url": "https://smallhourstools.com/print-cost-calculator/guides/printer-wear-cost/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/printer-wear-cost/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › Guides</header>
+  <main>
+    <h1>3D printer wear and depreciation: what it costs per print hour</h1>
+    <p>Every hour your printer runs uses up a little of the machine and its parts. That cost is real, but nobody can hand you the right number: printer makers don't publish a lifetime in hours, and how long a nozzle or build plate lasts depends on what you print. So this guide gives you the method and the arithmetic, and you supply the numbers. It takes about five minutes.</p>
+    <p>Wear has two parts: <strong>depreciation</strong> (the printer itself losing value) and <strong>maintenance</strong> (parts you replace). Add them to get a cost per print hour, then multiply by the print's hours.</p>
+
+    <h2>Step 1: depreciation per print hour</h2>
+    <p><strong>Depreciation per hour = (price you paid − what you could sell it for later) ÷ print hours you expect before you replace it</strong></p>
+    <p>For the hours, think in weeks rather than a lifetime: hours of printing per week × weeks you expect to keep the printer. If you print about 20 hours a week and upgrade every 3 years, that is 20 × 52 × 3 = <strong>3,120 hours</strong>. If your printer or its app shows a total print time, use it to check your weekly figure.</p>
+    <p>The table works for any currency. Find your net price (purchase price minus expected resale) and read across.</p>
+    <section class="scroll" aria-label="Depreciation per print hour by net printer price and expected hours" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Net printer price</th><th scope="col">over 2,000 h</th><th scope="col">over 4,000 h</th><th scope="col">over 8,000 h</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">200 net</th><td>0.100</td><td>0.050</td><td>0.025</td></tr>
+          <tr><th scope="row">400 net</th><td>0.200</td><td>0.100</td><td>0.050</td></tr>
+          <tr><th scope="row">800 net</th><td>0.400</td><td>0.200</td><td>0.100</td></tr>
+          <tr><th scope="row">1,500 net</th><td>0.750</td><td>0.375</td><td>0.188</td></tr>
+          <tr><th scope="row">3,000 net</th><td>1.500</td><td>0.750</td><td>0.375</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">Per print hour, rounded to three decimals. A printer bought for 600 that you expect to sell for 200 has a net price of 400.</p>
+
+    <h2>Step 2: maintenance per print hour</h2>
+    <p><strong>Maintenance per hour = the sum of (part price ÷ print hours between replacements)</strong> for each part you actually replace: nozzles, build plates, belts, PTFE tubes, wipers, fans and so on.</p>
+    <p>The best source is your own history. Note the date and the printer's total print time each time you replace something; after a few months you have real intervals. Until then, a rough guess is fine, because these amounts are small. Here is the arithmetic with <em>made-up</em> numbers, only to show how it adds up:</p>
+    <section class="scroll" aria-label="Example maintenance worksheet with made-up numbers" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Part (example)</th><th scope="col">Price</th><th scope="col">Replaced every</th><th scope="col">Per hour</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Nozzle</th><td>12</td><td>1,000 h</td><td>0.012</td></tr>
+          <tr><th scope="row">Build plate</th><td>40</td><td>2,000 h</td><td>0.020</td></tr>
+          <tr><th scope="row">Belts, tubes, small parts</th><td>20</td><td>2,000 h</td><td>0.010</td></tr>
+          <tr><th scope="row">Maintenance</th><td></td><td></td><td><strong>0.042</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">Abrasive filaments (carbon fiber, glow-in-the-dark) wear brass nozzles much faster, so give them their own, shorter interval if you print a lot of them.</p>
+
+    <h2>Step 3: put it together</h2>
+    <p>With the examples above, a printer with a net price of 400 over 3,120 hours costs 0.128 per hour, plus 0.042 maintenance: about <strong>0.170 per print hour</strong>. For the 7 h 25 min print in our <a href="../how-to-price-3d-prints/">pricing guide</a>, that is 0.95 of depreciation and 0.31 of maintenance, <strong>1.26</strong> in total: about as much as its 62 g of filament.</p>
+    <p>That is the point worth remembering: wear grows with print <em>time</em>, not with grams. A slow, light print (fine layers, small nozzle) can cost more in wear than in material, and pricing on grams alone misses it.</p>
+
+    <h2>The calculator's defaults are placeholders</h2>
+    <p>The <a href="../../">calculator</a> starts with a 400 printer over 4,000 hours (0.10 per hour) and 0.05 per hour of maintenance, so 0.15 per print hour. Those are round starting values, not measurements, and they are there so the wear line isn't zero. Replace them with your own figures from steps 1 and 2: the calculator has fields for printer price, lifetime hours and maintenance per hour, and remembers them in your browser.</p>
+    <p>Two things to leave out of wear: failed prints belong in the waste percentage (they cost filament and time, not machine life), and electricity has its own line (see <a href="../electricity-cost/">electricity cost per print</a>).</p>
+
+    <div class="cta">
+      <p><strong>Price your own print.</strong> Drop a sliced file (G-code, .bgcode, 3MF or .ufp) into the <a href="../../">free 3D print cost calculator</a>, enter your wear figures once, and every print gets its share. <a href="../../#g=62.1&amp;s=26707">Open the 7-hour example</a> to see the wear line. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li>All tables are arithmetic on the numbers shown; the maintenance worksheet uses made-up example prices and intervals, not measured data.</li>
+      <li>Print time of the example: <code>test.bgcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a>, 26,707 s (see the <a href="../how-to-price-3d-prints/">pricing guide</a>).</li>
+      <li>On lifetimes: in October 2026 we looked for official lifetime or replacement-interval figures in hours from Bambu Lab and Prusa and found maintenance procedures but no such figures, which is why this guide asks for your own.</li>
+    </ul>
+    <p class="note">Checked 10 October 2026. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
