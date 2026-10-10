@@ -209,7 +209,7 @@ describe('infill guide', () => {
   // Written by an AI agent (Claude): the share table and the savings text recompute from the per-feature
   // totals in docs/reference-data.md, and those totals add up to each file's stated length (hq t036).
   const html = text('infill-and-filament-cost');
-  const ref = readFileSync('docs/reference-data.md', 'utf8').split('## Filament by feature')[1].split('\n')
+  const ref = readFileSync('docs/reference-data.md', 'utf8').split('## Filament by feature')[1].split('\n## ')[0].split('\n')
     .filter((l) => /^\| \S+\.gcode \|/.test(l))
     .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()))
     .map(([file, infill, stated, ...rest]) => ({ file, infill, stated: +stated, parts: rest.slice(0, 4).map(Number), grams: +rest[4] }));

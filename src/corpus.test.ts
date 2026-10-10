@@ -82,3 +82,22 @@ describe('slicer-matrix feature split', () => {
     expect(await featureLengthsFrom3mf(load('B01_cube.gcode.3mf'), 1000)).toEqual({});
   });
 });
+
+// hq t038: the support-share table in docs/reference-data.md is recomputed from the files.
+describe('support share table', () => {
+  const doc = readFileSync(new URL('../docs/reference-data.md', import.meta.url), 'utf8');
+  const section = doc.slice(doc.indexOf('## Support material share'));
+  const rows = [...section.matchAll(/^\| ([\w.]+\.gcode) \| [^|]+ \| ([\d.]+) \| ([\d.]+) \| (\d+)% \| ([\d.]+) \|$/gm)];
+  it('lists the three support cases', () => expect(rows.map((r) => r[1])).toEqual(['P05_supports.gcode', 'B04_supports.plate_1.gcode', 'O04_supports.plate_1.gcode']));
+  for (const [, name, stated, support, share, weight] of rows) {
+    it(`${name}: matches the file`, async () => {
+      const bytes = load(name);
+      const r = await parseFile(bytes);
+      const l = featureLengthsFromBytes(bytes);
+      expect(r.filaments[0].lengthMm).toBeCloseTo(parseFloat(stated), 2);
+      expect(r.totalWeightG).toBe(parseFloat(weight));
+      expect(l.support!.toFixed(1)).toBe(support);
+      expect(Math.round((l.support! / parseFloat(stated)) * 100)).toBe(parseInt(share, 10));
+    });
+  }
+});
