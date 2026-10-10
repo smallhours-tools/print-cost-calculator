@@ -67,12 +67,15 @@ async function handleFile(file: File) {
     input('weightG').value = parsed.totalWeightG !== undefined ? String(Math.round(parsed.totalWeightG * 10) / 10) : '';
     setTime(parsed.printTimeSeconds);
     const bits = [`Detected slicer: ${parsed.slicer}`, `${parsed.filaments.length} filament(s)`];
+    if (parsed.printerModel) bits.push(`printer: ${parsed.printerModel}`);
     if (parsed.totalWeightG === undefined) bits.push('no weight found: enter it manually');
     if (parsed.printTimeSeconds === undefined) bits.push('no print time found: enter it manually');
     status.textContent = [...bits, ...parsed.warnings].join(' · ');
     render();
     // Pro preview listens for this to preselect saved materials. Only types and weights, never file text beyond them.
     document.dispatchEvent(new CustomEvent('pcc:parsed', { detail: parsed.filaments.map((f) => ({ type: f.type, weightG: f.weightG })) }));
+    // ...and this to preselect a saved printer (model and preset are cleaned short labels).
+    document.dispatchEvent(new CustomEvent('pcc:printer', { detail: { model: parsed.printerModel, preset: parsed.printerPreset } }));
   } catch (e) {
     const msg = e instanceof Error ? e.message : '';
     // Messages written as full sentences (e.g. "This project hasn't been sliced...") read better on their own.

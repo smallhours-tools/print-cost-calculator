@@ -64,6 +64,18 @@ describe('library', () => {
     expect(suggestPrinter(lib, 'Bambu Lab P1')).toBeUndefined();
   });
 
+  it('suggests a printer by name when no match is set, preferring the longest hit (hq t012)', () => {
+    let lib = sample();
+    expect(suggestPrinter(lib, 'MK4S Original Prusa MK4S 0.4 nozzle')?.name).toBe('MK4S');
+    expect(suggestPrinter(lib, 'MK4 Original Prusa MK4 0.4 nozzle')).toBeUndefined();
+    lib = upsertItem(lib, 'printers', { name: 'MINI', values: lib.printers[1].values });
+    lib = upsertItem(lib, 'printers', { name: 'Prusa MINI+', values: lib.printers[1].values });
+    expect(suggestPrinter(lib, 'MINIIS Original Prusa MINI & MINI+ Input Shaper')?.name).toBe('Prusa MINI+');
+    expect(suggestPrinter(lib, 'MINI My MINI 0.4 nozzle')?.name).toBe('MINI');
+    expect(suggestPrinter(lib, '')).toBeUndefined();
+    expect(suggestPrinter(lib, undefined)).toBeUndefined();
+  });
+
   it('round-trips a v2 export', () => {
     const lib = sample();
     expect(importLibrary(exportLibrary(lib))).toEqual(lib);

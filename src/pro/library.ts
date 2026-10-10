@@ -78,11 +78,23 @@ export function suggestMaterial(lib: Library, f: FilamentUsage): MaterialItem | 
   );
 }
 
-/** Printer entry whose `match` appears in a model string (for when a parser reports the printer model). */
+/**
+ * Printer entry to preselect from the file's printer model/preset text: an entry whose `match`, else whose name,
+ * appears in it as whole words. The longest hit wins, so "P1S Combo" beats "P1S".
+ */
 export function suggestPrinter(lib: Library, model?: string): PrinterItem | undefined {
   if (!model) return undefined;
   const m = ` ${norm(model)} `;
-  return lib.printers.find((p) => p.match && norm(p.match) && m.includes(` ${norm(p.match)} `));
+  const best = (key: (p: PrinterItem) => string | undefined) => {
+    let hit: PrinterItem | undefined;
+    let len = 0;
+    for (const p of lib.printers) {
+      const k = norm(key(p) ?? '');
+      if (k && k.length > len && m.includes(` ${k} `)) { hit = p; len = k.length; }
+    }
+    return hit;
+  };
+  return best((p) => p.match) ?? best((p) => p.name);
 }
 
 export function exportLibrary(lib: Library): string {
