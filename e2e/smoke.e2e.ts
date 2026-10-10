@@ -275,3 +275,17 @@ test('G-code with feature comments shows where the filament goes (hq t039)', asy
   await expect(page.locator('#feature-split')).toBeHidden();
   expect(errors).toEqual([]);
 });
+
+test('.bgcode shows where the filament goes too (hq t041)', async ({ page }) => {
+  const errors = trackErrors(page);
+  // Minimal .bgcode: header, uncompressed print-metadata block, uncompressed plain G-code block.
+  const u32 = (v: number) => { const b = Buffer.alloc(4); b.writeUInt32LE(v); return b; };
+  const u16 = (v: number) => { const b = Buffer.alloc(2); b.writeUInt16LE(v); return b; };
+  const meta = Buffer.from('filament used [mm]=4.00\nfilament used [g]=8.00\nestimated printing time (normal mode)=1m 0s\n');
+  const gcode = Buffer.from('M83\n;TYPE:Perimeter\nG1 X1 E3\n;TYPE:Internal infill\nG1 Y1 E1\n');
+  const f = Buffer.concat([Buffer.from('GCDE'), u32(1), u16(0), u16(4), u16(0), u32(meta.length), u16(0), meta, u16(1), u16(0), u32(gcode.length), u16(0), gcode]);
+  await page.goto('/');
+  await page.setInputFiles('#file', file('split.bgcode', f));
+  await expect(page.locator('#feature-split-text')).toHaveText('walls 6.0 g (75%), sparse infill 2.0 g (25%)');
+  expect(errors).toEqual([]);
+});

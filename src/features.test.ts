@@ -52,6 +52,7 @@ describe('streaming and summary', () => {
     expect(featureSummary({ walls: 5 }, 10, 6)).toBeUndefined();
     expect(featureSummary({ walls: 5 }, 10, 5.2)).toBe('walls 10.0 g (100%)');
     expect(featureSummary({}, 10)).toBeUndefined();
+    expect(featureSummary({ walls: 999, other: 1 }, 10)).toBe('walls 10.0 g (100%)');
     expect(featureSummary({ walls: 5 }, 0)).toBeUndefined();
   });
 });
