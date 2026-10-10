@@ -47,6 +47,7 @@
       <label for="file">Choose a sliced file (.gcode, .bgcode, .3mf or .ufp), or drop it here</label>
       <input id="file" type="file" accept=".gcode,.gco,.3mf,.bgcode,.ufp,text/plain">
       <p id="file-status" role="status" aria-live="polite">Or skip this and enter weight and time manually below.</p>
+      <p id="feature-split" class="note" hidden>Where the filament goes: <span id="feature-split-text"></span>. <a href="./guides/infill-and-filament-cost/">What lowering infill saves</a></p>
       <p id="power-hint" class="note" hidden><span id="power-hint-text"></span> <button type="button" id="power-hint-use">Use it</button></p>
     </div>
     <form id="calc" onsubmit="return false">

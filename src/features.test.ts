@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { featureGroup, featureLengths } from './parsers/features';
+import { featureGroup, featureLengths, featureLengthsFromBytes, featureSummary } from './parsers/features';
 
 // Written by an AI agent (Claude): per-feature extrusion sums (hq t036).
 describe('featureLengths', () => {
@@ -36,4 +36,22 @@ describe.skipIf(!dir)('featureLengths on real files', () => {
       expect(Math.abs(sum / parseFloat(stated[1]) - 1)).toBeLessThan(0.025);
     });
   }
+});
+
+describe('streaming and summary', () => {
+  const g = ['M83', ';TYPE:External perimeter', 'G1 X1 Y1 E3', ';TYPE:Internal infill', 'G1 X2 E1', '; FEATURE: Outer wall', 'G1 X3 E2', ';TYPE:Solid infill', 'G1 X4 E2'].join('\n');
+  it('gives the same result for any chunk size', () => {
+    const bytes = new TextEncoder().encode(g);
+    for (const n of [1, 2, 7, 1000]) expect(featureLengthsFromBytes(bytes, n)).toEqual({ walls: 5, sparse: 1, solid: 2 });
+  });
+  it('reads Bambu-style FEATURE comments', () => expect(featureLengths('M83\n; FEATURE: Sparse infill\nG1 X1 E2\n; FEATURE: Prime tower\nG1 Y1 E1\n')).toEqual({ sparse: 2, tower: 1 }));
+  it('summarises biggest first as grams and shares', () => {
+    expect(featureSummary({ walls: 5, sparse: 1, solid: 2 }, 16, 8)).toBe('walls 10.0 g (63%), solid layers 4.0 g (25%), sparse infill 2.0 g (13%)');
+  });
+  it('says nothing when sums disagree with the stated length, or there is nothing to say', () => {
+    expect(featureSummary({ walls: 5 }, 10, 6)).toBeUndefined();
+    expect(featureSummary({ walls: 5 }, 10, 5.2)).toBe('walls 10.0 g (100%)');
+    expect(featureSummary({}, 10)).toBeUndefined();
+    expect(featureSummary({ walls: 5 }, 0)).toBeUndefined();
+  });
 });

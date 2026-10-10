@@ -1,5 +1,7 @@
 import { computeCost, DEFAULTS, perHour, type CostInputs } from './cost';
-import { parseFile } from './parsers/index';
+import { parseFile, type ParsedFile } from './parsers/index';
+import { isBgcode } from './parsers/bgcode';
+import { featureLengthsFromBytes, featureSummary } from './parsers/features';
 import { jobHash, parseHashJob } from './hash';
 import { powerHint } from './printer-power';
 import { proPreviewEnabled } from './pro/gate';
@@ -83,11 +85,26 @@ function showPowerHint(model?: string) {
   };
 }
 
+/** hq t039: per-feature split for single-filament plain G-code with feature comments; hidden otherwise. */
+const FEATURE_MAX_BYTES = 64 * 1024 * 1024;
+function showFeatureSplit(bytes: Uint8Array, parsed: ParsedFile) {
+  const box = $('feature-split');
+  box.hidden = true;
+  const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b;
+  if (isZip || isBgcode(bytes) || bytes.length > FEATURE_MAX_BYTES || parsed.filaments.length !== 1 || !parsed.totalWeightG) return;
+  const line = featureSummary(featureLengthsFromBytes(bytes), parsed.totalWeightG, parsed.filaments[0].lengthMm);
+  if (!line) return;
+  $('feature-split-text').textContent = line;
+  box.hidden = false;
+}
+
 async function handleFile(file: File) {
   const status = $('file-status');
   status.textContent = 'Reading file locally…';
+  $('feature-split').hidden = true;
   try {
-    const parsed = await parseFile(new Uint8Array(await file.arrayBuffer()));
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const parsed = await parseFile(bytes);
     input('weightG').value = parsed.totalWeightG !== undefined ? String(Math.round(parsed.totalWeightG * 10) / 10) : '';
     setTime(parsed.printTimeSeconds);
     const bits = [`Detected slicer: ${parsed.slicer}`, `${parsed.filaments.length} filament(s)`];
@@ -102,6 +119,7 @@ async function handleFile(file: File) {
     // ...and this to preselect a saved printer (model and preset are cleaned short labels).
     document.dispatchEvent(new CustomEvent('pcc:printer', { detail: { model: parsed.printerModel, preset: parsed.printerPreset } }));
     showPowerHint(parsed.printerModel);
+    try { showFeatureSplit(bytes, parsed); } catch { $('feature-split').hidden = true; }
   } catch (e) {
     $('power-hint').hidden = true;
     const msg = e instanceof Error ? e.message : '';
