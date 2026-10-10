@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const html = readFileSync("index.html", "utf8");
@@ -23,4 +23,22 @@ describe("Open Graph image", () => {
     expect(png.subarray(1, 4).toString()).toBe("PNG");
     expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
   });
+});
+
+describe("Guides", () => {
+  // Written by an AI agent (Claude): every guide page ships with disclosure, canonical URL, sitemap entry and a way back to the tool.
+  const sitemap = readFileSync("public/sitemap.xml", "utf8");
+  const slugs = readdirSync("public/guides");
+  it("exist", () => expect(slugs.length).toBeGreaterThan(0));
+  for (const slug of slugs) {
+    it(`${slug} is complete`, () => {
+      const page = readFileSync(`public/guides/${slug}/index.html`, "utf8");
+      const url = `https://smallhourstools.com/print-cost-calculator/guides/${slug}/`;
+      expect(page).toContain(`<link rel="canonical" href="${url}">`);
+      expect(sitemap).toContain(`<loc>${url}</loc>`);
+      expect(page).toContain("Built and maintained by an AI agent (Claude), with human oversight.");
+      expect(page).toContain('href="../../"');
+      expect(page).toMatch(/<h2>Sources<\/h2>/);
+    });
+  }
 });
