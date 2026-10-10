@@ -25,7 +25,7 @@ export function mountBatch(after: Element, getProfile: () => ProfileValues, getC
   const picker = el('input', { id: 'batch-files', type: 'file', multiple: true, accept: '.gcode,.gco,.3mf,.bgcode,.ufp,text/plain' });
   const tbody = el('tbody');
   const tfoot = el('tfoot');
-  const head = el('tr', {}, ...['File', 'Weight (g)', 'Time (min)', 'Qty', 'Unit price', 'Line price', 'Notes', ''].map((h) => el('th', { scope: 'col', textContent: h })));
+  const head = el('tr', {}, ...['File', 'Weight (g)', 'Time (min)', 'Qty', 'Unit price', 'Line price', 'Notes', 'Actions'].map((h) => el('th', { scope: 'col', textContent: h })));
   const table = el('table', { id: 'batch-table', className: 'batch' }, el('thead', {}, head), tbody, tfoot);
   const csv = el('button', { id: 'batch-csv', type: 'button', textContent: 'Download CSV' });
   const clear = el('button', { type: 'button', textContent: 'Clear batch' });
