@@ -107,3 +107,13 @@ test_multimaterial.gcode is left out: MMU loading and ramming moves don't add up
 | screw.gcode | 5% | 1706.22 | 659.1 | 844.6 | 173.8 | 28.7 | 5.09 |
 | plant-sign.gcode | 5% | 1645.00 | 454.9 | 1141.5 | 0 | 48.6 | 4.91 |
 | vase.gcode | 0% | 2996.07 | 2187.1 | 773.8 | 0 | 35.1 | 8.94 |
+
+## Support material share (2026-10-10, hq t038)
+
+From our own slicer-matrix files (test-corpus/slicer-matrix/): the same T-shape model sliced with automatic supports by each slicer, split per feature by `featureLengths()`. `src/corpus.test.ts` recomputes this table from the files. One model only, and a deliberately support-heavy one (a wide overhanging bar), so it shows how supports can dominate, not a typical share; a support-waste guide needs more shapes (more models via the Lab, hq t051-style).
+
+| File | Slicer, support settings | Stated (mm) | Supports (mm) | Supports share | Weight (g) |
+|---|---|---|---|---|---|
+| P05_supports.gcode | PrusaSlicer 2.9.6, snug, threshold 35°, 15% infill | 2354.86 | 1253.2 | 53% | 7.02 |
+| B04_supports.plate_1.gcode | Bambu Studio 02.08, normal(auto), 30°, 20% infill | 2394.25 | 1373.2 | 57% | 7.26 |
+| O04_supports.plate_1.gcode | OrcaSlicer 2.4.2, normal(auto), 30°, 15% infill | 2487.12 | 1443.0 | 58% | 7.42 |
