@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parseFile, ParseError } from './parsers/index';
+import { featureLengthsFrom3mf, featureLengthsFromBytes, featureSummary } from './parsers/features';
 
 interface CorpusFile {
   file: string;
@@ -54,4 +55,30 @@ describe('slicer-matrix corpus', () => {
       expect((err as Error).message).toBe(f.reject_message);
     });
   }
+});
+
+// hq t040: the "where the filament goes" split, on real Bambu Studio / OrcaSlicer 3MFs and plate G-code.
+describe('slicer-matrix feature split', () => {
+  // The tiny cubes (B03/O03, 0.15 g) are left out: slice_info states length in metres with 2 decimals, so
+  // 0.06 m can be 5% off and the split rightly hides itself.
+  const single = committed.filter((f) => f.expect === 'parse' && /^[BO]0[1245]/.test(f.file));
+  for (const f of single) {
+    it(`${f.file}: feature sums match the slicer's filament length and give a summary`, async () => {
+      const bytes = load(f.file);
+      const r = await parseFile(bytes);
+      const lengths = f.file.endsWith('.3mf') ? await featureLengthsFrom3mf(bytes, 64 << 20) : featureLengthsFromBytes(bytes);
+      const sum = Object.values(lengths).reduce((a, b) => a + b!, 0);
+      expect(Math.abs(sum / r.filaments[0].lengthMm! - 1)).toBeLessThan(0.01);
+      expect(featureSummary(lengths, r.totalWeightG!, r.filaments[0].lengthMm)).toMatch(/^(walls|sparse infill|supports) /);
+    });
+  }
+  it('supports show up as supports in the support cases', async () => {
+    for (const name of ['B04_supports.gcode.3mf', 'O04_supports.gcode.3mf']) {
+      const r = await parseFile(load(name));
+      expect(featureSummary(await featureLengthsFrom3mf(load(name), 64 << 20), r.totalWeightG!, r.filaments[0].lengthMm)).toMatch(/^supports \d/);
+    }
+  });
+  it('says nothing when the plates are over the size limit', async () => {
+    expect(await featureLengthsFrom3mf(load('B01_cube.gcode.3mf'), 1000)).toEqual({});
+  });
 });
