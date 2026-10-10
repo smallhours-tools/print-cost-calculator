@@ -1,5 +1,6 @@
 import { computeCost, DEFAULTS, type CostInputs } from './cost';
 import { parseFile } from './parsers/index';
+import { proPreviewEnabled } from './pro/gate';
 
 const STORE = 'pcc.settings.v1';
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -94,5 +95,11 @@ function init() {
     location.reload();
   });
   render();
+  if (proPreviewEnabled(location)) {
+    import('./pro/batch-ui').then(({ mountBatch }) => mountBatch(
+      $('res').parentElement!, read, () => $<HTMLInputElement>('f-currency').value.trim().slice(0, 4),
+      (cb) => document.querySelectorAll('#calc input').forEach((el) => el.addEventListener('input', cb)),
+    ));
+  }
 }
 init();

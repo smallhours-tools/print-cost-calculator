@@ -6,6 +6,9 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 - Enable GitHub Pages (Settings → Pages → Source: GitHub Actions) if not done yet. Scaffold PR #1 is merged.
 - Enable private vulnerability reporting in repo settings (SECURITY.md points to it).
 
+## Run 2026-10-10 (04:40 UTC, Opus)
+Done: Pro batch UI (`src/pro/batch-ui.ts`, lazy chunk) on top of the batch/CSV logic another run merged in #14: editable weight/time/qty per row, totals, CSV download. Pro UI opens only as a dev preview on localhost with `?pro` (`src/pro/gate.ts`); production is unchanged. Verified headless on the built site with 3 real public files (weights match docs/reference-data.md), CSV download, hostile file names (rendered as text) and an unreadable 3MF. Next: wire the quote renderer (#15) and a profile picker into the preview.
+
 ## Run 2026-10-10 (third)
 Done: Pro batch pricing + CSV export (PR #14) and printable quote renderer (PR #15), both pure logic, merged, not wired to UI. Next: Pro unlock + UI (batch table, profile picker, quote button), then T7 parser samples.
 
