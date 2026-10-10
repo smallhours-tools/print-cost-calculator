@@ -3,6 +3,7 @@ import { ParseError } from './types';
 import { parseGcodeText } from './gcode';
 import { parse3mf } from './threemf';
 import { isBgcode, parseBgcode } from './bgcode';
+import { implausibleTotals } from './sanity';
 
 export type { ParsedFile, FilamentUsage, Slicer } from './types';
 export { ParseError } from './types';
@@ -11,6 +12,12 @@ const MAX_FILE_BYTES = 512 * 1024 * 1024;
 
 /** Detect file type by content and parse it. Throws ParseError on unusable input. */
 export async function parseFile(bytes: Uint8Array): Promise<ParsedFile> {
+  const r = await parseAny(bytes);
+  r.warnings.push(...implausibleTotals(r));
+  return r;
+}
+
+async function parseAny(bytes: Uint8Array): Promise<ParsedFile> {
   if (bytes.length > MAX_FILE_BYTES) throw new ParseError('File is too large');
   if (bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b) return parse3mf(bytes);
   if (isBgcode(bytes)) return parseBgcode(bytes);
