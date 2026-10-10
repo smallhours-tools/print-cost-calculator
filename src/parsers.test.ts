@@ -101,6 +101,18 @@ describe('gcode', () => {
     expect(r.totalWeightG).toBe(12.34);
     expect(r.printTimeSeconds).toBe(7384);
   });
+  it('Bambu Studio G-code with two AMS filaments: one weight per filament (written by an AI agent, Claude)', () => {
+    // Header as written by Bambu Studio 02.08 (P1S, PLA + PETG), test-corpus B08_ams_pla_petg.
+    const t = `; HEADER_BLOCK_START\n; BambuStudio 02.08.02.61\n; model printing time: 1h 38m 27s; total estimated time: 1h 38m 47s\n; total filament length [mm] : 5367.39,3918.93\n; total filament volume [cm^3] : 12910.08,9426.13\n; total filament weight [g] : 16.27,12.07\n; filament_density: 1.26,1.28\n; HEADER_BLOCK_END\n; filament_type = PLA;PETG\n`;
+    const r = parseGcodeText(t);
+    expect(r.filaments).toEqual([
+      { weightG: 16.27, lengthMm: 5367.39, type: 'PLA' },
+      { weightG: 12.07, lengthMm: 3918.93, type: 'PETG' },
+    ]);
+    expect(r.totalWeightG).toBe(28.34);
+    expect(r.printTimeSeconds).toBe(5927);
+  });
+
   it('Bambu Studio G-code export: total time follows the model time on one line', () => {
     // Header as written by Bambu Studio 02.08 (P1S profile), sliced from our own test cube.
     const t = `; HEADER_BLOCK_START\n; BambuStudio 02.08.02.61\n; model printing time: 8m 46s; total estimated time: 8m 47s\n; total layer number: 100\n; total filament weight [g] : 3.74\n; HEADER_BLOCK_END\n`;
