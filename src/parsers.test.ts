@@ -307,3 +307,26 @@ describe('printer model (hq t012; written by an AI agent, Claude)', () => {
     }
   });
 });
+
+describe('fuzz: hostile bytes only ever give a result or a ParseError (written by an AI agent, Claude)', () => {
+  let seed = 12345;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const mutate = (base: Uint8Array) => {
+    const b = base.slice();
+    for (let j = 0, n = 1 + Math.floor(rnd() * 8); j < n; j++) b[Math.floor(rnd() * b.length)] = Math.floor(rnd() * 256);
+    return rnd() < 0.2 ? b.subarray(0, Math.floor(rnd() * b.length)) : b;
+  };
+  const sliceInfo = '<config><plate><metadata key="prediction" value="843"/><filament id="1" type="PLA" used_m="1.2" used_g="3.69"/></plate></config>';
+  const seeds: [string, Uint8Array][] = [
+    ['3mf', makeZip({ 'Metadata/slice_info.config': sliceInfo, 'Metadata/project_settings.config': '{"printer_model":"Bambu Lab P1S"}', '3D/3dmodel.model': '<model/>' })],
+    ['3mf zip64', makeZip({ 'Metadata/slice_info.config': sliceInfo }, false, true)],
+    ['bgcode', makeBgcode([[0, 0, 'Producer=PrusaSlicer 2.9.0\n'], [3, 0, 'printer_model=MINI\n'], [4, 1, 'filament used [g]=62.10\nestimated printing time (normal mode)=7h 25m 7s\n'], [1, 3, 'x']])],
+  ];
+  for (const [name, base] of seeds) {
+    it(`${name}: 300 mutated copies`, async () => {
+      for (let i = 0; i < 300; i++) {
+        try { await parseFile(mutate(base)); } catch (e) { expect(e).toBeInstanceOf(ParseError); }
+      }
+    });
+  }
+});
