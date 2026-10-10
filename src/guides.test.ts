@@ -57,7 +57,7 @@ describe('filament guide', () => {
 describe('guide structured data', () => {
   // Written by an AI agent (Claude): Article JSON-LD must say what the page visibly says.
   const unescape = (s: string) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-  for (const slug of readdirSync('public/guides')) {
+  for (const slug of readdirSync('public/guides').filter((f) => !f.includes('.'))) {
     it(`${slug} has Article JSON-LD matching the page`, () => {
       const html = text(slug);
       const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)![1]);

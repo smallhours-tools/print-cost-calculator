@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3D printing cost guides: pricing, filament, electricity and wear</title>
+  <meta name="description" content="Short, sourced guides to what a 3D print really costs: how to price a print, filament cost per gram, electricity per print, printer wear per hour, and where slicers store print time and filament use.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/">
+  <meta property="og:title" content="3D printing cost guides">
+  <meta property="og:description" content="Pricing, filament, electricity and wear, each with real numbers you can check.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .guides li{margin:.8rem 0}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../">3D Print Cost Calculator</a> › Guides</header>
+  <main>
+    <h1>3D printing cost guides</h1>
+    <p>Each guide covers one part of what a print costs, shows its arithmetic, and lists its sources. Every table on these pages is recomputed by automated tests, so the numbers match the formulas.</p>
+    <ul class="guides">
+      <li><a href="./how-to-price-3d-prints/">How much should you charge for a 3D print?</a><br><span class="note">A step-by-step way to price 3D prints: material with waste, electricity, printer wear, labor, then margin and marketplace fees, worked through on a real 7-hour PrusaSlicer print.</span></li>
+      <li><a href="./filament-cost-per-gram/">Filament cost per gram and per meter</a><br><span class="note">How to work out filament cost per gram and per meter, with real densities for PLA, PETG, ABS, ASA, PC, TPU and carbon-fiber blends, and a cost table for any spool price.</span></li>
+      <li><a href="./electricity-cost/">How much electricity does a 3D print use?</a><br><span class="note">Measured average power for Prusa and Bambu Lab printers, what an hour of printing costs at the US average electricity price (18.3¢/kWh, EIA, July 2026), and a table for any rate.</span></li>
+      <li><a href="./printer-wear-cost/">3D printer wear and depreciation: what it costs per print hour</a><br><span class="note">How to work out the wear cost of a 3D printer per print hour from your own numbers: depreciation over the hours you expect, plus a maintenance allowance for parts you replace, with tables for any printer price.</span></li>
+      <li><a href="./slicer-print-time-and-filament/">Where to find print time and filament weight in G-code and 3MF files</a><br><span class="note">Where PrusaSlicer, OrcaSlicer, Cura and Bambu Studio write the estimated print time and filament use inside G-code, .bgcode and 3MF files, with the exact lines from real files and how to turn length or volume into grams.</span></li>
+    </ul>
+    <div class="cta">
+      <p><strong>Price your own print.</strong> Drop a sliced file (G-code, .bgcode, 3MF or .ufp) into the <a href="../">free 3D print cost calculator</a>. Your file never leaves your browser.</p>
+    </div>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
