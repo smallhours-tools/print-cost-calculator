@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to price a 3D print: cost, margin and fees, worked through</title>
+  <meta name="description" content="A step-by-step way to price 3D prints: material with waste, electricity, printer wear, labor, then margin and marketplace fees, worked through on a real 7-hour PrusaSlicer print.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/how-to-price-3d-prints/">
+  <meta property="og:title" content="How much should you charge for a 3D print?">
+  <meta property="og:description" content="Cost, margin and fees, worked through on a real print. Why cost + 30% leaves you far less than 30%.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/how-to-price-3d-prints/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › Guides</header>
+  <main>
+    <h1>How much should you charge for a 3D print?</h1>
+    <p>Add up what the print really costs you (material, electricity, machine wear and your time), then set the price so that, <em>after</em> the marketplace takes its fee, the profit you wanted is still there. The second half is where most people lose money: <strong>cost plus 30% does not leave you 30%</strong> once fees come out of the price.</p>
+
+    <h2>Step 1: what the print costs you</h2>
+    <ul>
+      <li><strong>Material</strong> = grams ÷ 1000 × spool price per kg × (1 + waste %). Waste covers purge, supports you throw away and the occasional failed print. Your slicer reports the grams; see <a href="../filament-cost-per-gram/">filament cost per gram</a> for densities and per-gram prices.</li>
+      <li><strong>Electricity</strong> = average watts × hours ÷ 1000 × price per kWh. Usually small; see <a href="../electricity-cost/">electricity cost per print</a> for measured watts by printer.</li>
+      <li><strong>Printer wear</strong> = (purchase price ÷ the print hours you expect from the machine) × hours, plus a maintenance allowance per hour for nozzles, belts, build plates and the like. Both are your own estimates; there is no universal figure.</li>
+      <li><strong>Labor</strong> = your minutes per order (removing supports, packing, messages) × your hourly rate. Count only your hands-on time, not the hours the printer runs alone.</li>
+    </ul>
+
+    <h2>Step 2: margin and fees come out of the price</h2>
+    <p>Marketplace fees are usually a percentage of the sale price plus a fixed amount per order, and a profit margin is a share of the price too. Both are taken from the price, so you divide instead of adding:</p>
+    <p><strong>Price = (cost + fixed fee) ÷ (1 − fee % − margin %)</strong></p>
+    <p>With a 6.5% fee and a 30% margin you divide by 0.635. That looks steep, but it is exactly what makes 30% of the price land in your pocket.</p>
+
+    <h2>Worked example: a real 7-hour print</h2>
+    <p>The file is <code>test.bgcode</code>, a binary G-code file from the PrusaSlicer source repository, sliced for an Original Prusa MINI. The slicer reports <strong>62.10 g</strong> of filament and <strong>7 h 25 min</strong> of printing. Everything else below is the calculator's default setting, chosen as a neutral starting point rather than a recommendation: change them to your own numbers.</p>
+    <section class="scroll" aria-label="Worked example: cost of a 62 g, 7 h 25 min print" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Item</th><th scope="col">Inputs</th><th scope="col">Amount</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Material</th><td>62.10 g at 20/kg, +5% waste</td><td>1.30</td></tr>
+          <tr><th scope="row">Electricity</th><td>100 W for 7.42 h at 0.15/kWh</td><td>0.11</td></tr>
+          <tr><th scope="row">Printer depreciation</th><td>400 printer over 4,000 h</td><td>0.74</td></tr>
+          <tr><th scope="row">Maintenance</th><td>0.05 per print hour</td><td>0.37</td></tr>
+          <tr><th scope="row">Labor</th><td>10 min at 15/h</td><td>2.50</td></tr>
+          <tr><th scope="row">Cost</th><td></td><td><strong>5.03</strong></td></tr>
+          <tr><th scope="row">Price</th><td>(5.03 + 0.25) ÷ (1 − 0.065 − 0.30)</td><td><strong>8.31</strong></td></tr>
+          <tr><th scope="row">Marketplace fee</th><td>6.5% of 8.31 + 0.25</td><td>0.79</td></tr>
+          <tr><th scope="row">Your profit</th><td>8.31 − 5.03 − 0.79</td><td><strong>2.49</strong> (30%)</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">Amounts are rounded to cents; the cost line is the unrounded sum. Any currency works.</p>
+    <p>Two things stand out. Labor is the biggest single cost, even at 10 minutes per order, and electricity is the smallest. In a case like this, knowing your real handling time matters far more than the exact electricity rate.</p>
+
+    <h2>The common mistake: cost plus a markup</h2>
+    <p>Take the same 5.03 cost and add 30%: the price is <strong>6.54</strong>. The marketplace then takes 6.5% plus 0.25, which is 0.67, and your profit is <strong>0.83</strong>, about 13% of the price rather than 30%, and a third of the 2.49 above. The gap grows with higher fees and on cheap items, where a fixed fee per order eats a larger share.</p>
+
+    <h2>Checks before you list</h2>
+    <ul>
+      <li>Use the fee rates of <em>your</em> platform and payment processor. Check whether the percentage also applies to shipping, and whether any advertising fees apply to some sales.</li>
+      <li>Set waste from your own failure rate. Multicolor prints with purge towers can waste far more than 5%.</li>
+      <li>Price the batch, not one part. If you print 10 at once, labor and failures spread over 10 sales.</li>
+      <li>Compare with what similar items sell for. The formula gives your floor; the market sets the ceiling.</li>
+    </ul>
+
+    <div class="cta">
+      <p><strong>Price your own print.</strong> Drop a sliced file (G-code, .bgcode, 3MF or .ufp) into the <a href="../../">free 3D print cost calculator</a>. It reads print time and filament from the file and does the arithmetic above with your own rates. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li>Print time and filament weight: <code>test.bgcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a> (PrusaSlicer 2.9.0), read with this calculator's parser: 26,707 s and 62.10 g.</li>
+      <li>Default printer power (100 W) and electricity figures: see the sources in <a href="../electricity-cost/">electricity cost per print</a>.</li>
+      <li>All other inputs are the calculator's editable defaults, not measured data. The pricing formula is plain arithmetic, shown above.</li>
+    </ul>
+    <p class="note">Example checked 10 October 2026. Written by an AI agent (Claude) from the sources above.</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
