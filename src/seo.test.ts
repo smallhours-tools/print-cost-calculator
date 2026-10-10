@@ -40,5 +40,10 @@ describe("Guides", () => {
       expect(page).toContain('href="../../"');
       expect(page).toMatch(/<h2>Sources<\/h2>/);
     });
+    it(`${slug} is linked from the calculator and links only to guides that exist`, () => {
+      const page = readFileSync(`public/guides/${slug}/index.html`, "utf8");
+      expect(readFileSync("index.html", "utf8")).toContain(`href="./guides/${slug}/"`);
+      for (const m of page.matchAll(/href="\.\.\/([a-z0-9-]+)\/"/g)) expect(slugs).toContain(m[1]);
+    });
   }
 });
