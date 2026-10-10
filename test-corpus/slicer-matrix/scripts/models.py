@@ -30,3 +30,29 @@ stl('tee_overhang', box(-4,-4,0,4,4,30) + box(-30,-4,30,30,4,36))  # 26 mm horiz
 stl('vase_cyl', cyl(0,0,30,80))                    # spiral/vase mode
 stl('slab_long', box(-75,-75,0,75,75,60))            # with 100% infill: a multi-day print (day units in time strings)
 stl('pair_a', box(0,0,0,20,20,10)); stl('pair_b', box(30,0,0,50,20,10))   # two objects for multi-material
+
+# Multi-material input for PrusaSlicer: a 3MF whose Metadata/Slic3r_PE_model.config puts each object on its own
+# extruder (the CLI has no per-object extruder option). Bambu Studio / OrcaSlicer crash on hand-written project
+# 3MFs, so their multi-filament cases use --load-filament-ids with STLs instead (see run_matrix.sh).
+import zipfile
+def prusa3mf(name, objects, at=(0, 0)):   # objects: (name, tris, extruder)
+    objs, cfg = [], []
+    for oid, (oname, tris, ext) in enumerate(objects, 1):
+        idx = {}; ts = [[idx.setdefault(p, len(idx)) for p in tri] for tri in tris]
+        mesh = ('<mesh><vertices>' + ''.join(f'<vertex x="{x:.4f}" y="{y:.4f}" z="{z:.4f}"/>' for x, y, z in sorted(idx, key=idx.get)) +
+                '</vertices><triangles>' + ''.join(f'<triangle v1="{a}" v2="{b}" v3="{c}"/>' for a, b, c in ts) + '</triangles></mesh>')
+        objs.append(f'<object id="{oid}" name="{oname}" type="model">{mesh}</object>')
+        cfg.append(f'<object id="{oid}" instances_count="1"><metadata type="object" key="name" value="{oname}"/>'
+                   f'<metadata type="object" key="extruder" value="{ext}"/><volume firstid="0" lastid="{len(ts)-1}">'
+                   f'<metadata type="volume" key="name" value="{oname}"/><metadata type="volume" key="volume_type" value="ModelPart"/></volume></object>')
+    build = ''.join(f'<item objectid="{i}" transform="1 0 0 0 1 0 0 0 1 {at[0]} {at[1]} 0"/>' for i in range(1, len(objects) + 1))
+    with zipfile.ZipFile(os.path.join(OUT, name + '.3mf'), 'w', zipfile.ZIP_DEFLATED) as z:
+        z.writestr('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+                   '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+                   '<Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>')
+        z.writestr('_rels/.rels', '<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                   '<Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>')
+        z.writestr('3D/3dmodel.model', '<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
+                   'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"><resources>' + ''.join(objs) + '</resources><build>' + build + '</build></model>')
+        z.writestr('Metadata/Slic3r_PE_model.config', '<?xml version="1.0" encoding="UTF-8"?>\n<config>' + ''.join(cfg) + '</config>')
+prusa3mf('pair_prusa', [('pair_a', box(0,0,0,20,20,10), 1), ('pair_b', box(30,0,0,50,20,10), 2)], at=(110, 120))   # PLA on T0, PETG on T1
