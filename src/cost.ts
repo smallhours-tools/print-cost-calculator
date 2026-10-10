@@ -53,8 +53,9 @@ export function computeCost(i: CostInputs): CostBreakdown {
   return { material, electricity, wear, labor, subtotal, suggestedPrice, fees, profit };
 }
 
+// printerPowerW: typical average while printing PLA (Prusa knowledge base, Bambu Lab wiki).
 export const DEFAULTS: CostInputs = {
   weightG: 0, printTimeHours: 0, filamentPricePerKg: 20, wastePct: 5,
-  printerPowerW: 120, electricityPerKwh: 0.15, printerCost: 400, printerLifetimeHours: 4000,
+  printerPowerW: 100, electricityPerKwh: 0.15, printerCost: 400, printerLifetimeHours: 4000,
   maintenancePerHour: 0.05, laborMinutes: 10, laborPerHour: 15, marginPct: 30, feePct: 6.5, feeFixed: 0.25,
 };

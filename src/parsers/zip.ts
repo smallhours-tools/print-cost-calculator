@@ -10,8 +10,8 @@ export interface ZipEntry {
 const u16 = (d: DataView, o: number) => d.getUint16(o, true);
 const u32 = (d: DataView, o: number) => d.getUint32(o, true);
 
-async function inflateRaw(data: Uint8Array, limit: number): Promise<Uint8Array> {
-  const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+export async function inflate(data: Uint8Array, limit: number, format: CompressionFormat = 'deflate-raw'): Promise<Uint8Array> {
+  const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream(format));
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -67,7 +67,7 @@ export function listZip(buf: Uint8Array): ZipEntry[] {
         const start = lho + 30 + u16(d, lho + 26) + u16(d, lho + 28);
         const raw = buf.subarray(start, start + csize);
         if (method === 0) return raw.slice();
-        if (method === 8) return inflateRaw(raw, Math.min(MAX_ENTRY_BYTES, usize + 1024));
+        if (method === 8) return inflate(raw, Math.min(MAX_ENTRY_BYTES, usize + 1024));
         throw new ParseError('Unsupported zip compression');
       },
     });

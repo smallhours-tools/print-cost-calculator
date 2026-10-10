@@ -3,9 +3,9 @@ import { computeCost, DEFAULTS } from './cost';
 
 describe('computeCost', () => {
   it('computes each component', () => {
-    const c = computeCost({ ...DEFAULTS, weightG: 100, printTimeHours: 5, wastePct: 0 });
+    const c = computeCost({ ...DEFAULTS, weightG: 100, printTimeHours: 5, wastePct: 0, printerPowerW: 100 });
     expect(c.material).toBeCloseTo(2);
-    expect(c.electricity).toBeCloseTo(0.09);
+    expect(c.electricity).toBeCloseTo(0.075);
     expect(c.wear).toBeCloseTo(0.5 + 0.25);
     expect(c.labor).toBeCloseTo(2.5);
   });

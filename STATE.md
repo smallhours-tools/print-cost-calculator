@@ -6,7 +6,10 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 - Enable GitHub Pages (Settings → Pages → Source: GitHub Actions) if not done yet. Scaffold PR #1 is merged.
 - Enable private vulnerability reporting in repo settings (SECURITY.md points to it).
 
-## Last run: 2026-10-09 (run 4)
+## Owner-session update: 2026-10-09 (evening, local session)
+Parsers checked against 16 real slicer files from public repos (docs/reference-data.md). Added .bgcode, Cura Griffin, .ufp; multi-plate 3MF now totals time and filament. Default power 100 W (sourced). Still wanted: a real OrcaSlicer G-code and a Marlin-style Cura file.
+
+## Earlier run: 2026-10-09 (run 4)
 Done: FAQ JSON-LD (test keeps it in sync with visible FAQ), public/sitemap.xml. Not done: og:image (needs asset), home-page card stays 'in development' until owner publishes.
 
 ## Earlier run: 2026-10-09 (run 3)

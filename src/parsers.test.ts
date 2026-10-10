@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deflateRawSync } from 'node:zlib';
+import { deflateRawSync, deflateSync } from 'node:zlib';
 import { parseFile } from './parsers/index';
 import { parseGcodeText } from './parsers/gcode';
 import { parseDuration } from './parsers/time';
@@ -75,6 +75,16 @@ describe('gcode', () => {
     expect(r.totalWeightG).toBe(12.34);
     expect(r.printTimeSeconds).toBe(7384);
   });
+  it('Cura Griffin header (UltiMaker), volume per extruder', () => {
+    // Header shape from real Cura 4.6 output for an UltiMaker S5.
+    const t = ';START_OF_HEADER\n;FLAVOR:Griffin\n;GENERATOR.NAME:Cura_SteamEngine\n;EXTRUDER_TRAIN.0.MATERIAL.VOLUME_USED:325509\n;EXTRUDER_TRAIN.1.MATERIAL.VOLUME_USED:35500\n;PRINT.TIME:353667\n;END_OF_HEADER\n;Generated with Cura_SteamEngine 4.6.2\nG1 X1\n';
+    const r = parseGcodeText(t);
+    expect(r.slicer).toBe('cura');
+    expect(r.printTimeSeconds).toBe(353667);
+    expect(r.filaments).toHaveLength(2);
+    expect(r.filaments[0].weightEstimated).toBe(true);
+    expect(r.totalWeightG).toBeCloseTo((325.509 + 35.5) * 1.24, 1);
+  });
   it('falls back gracefully on unknown input', () => {
     const r = parseGcodeText('G1 X1 Y1\nG1 X2\n');
     expect(r.slicer).toBe('unknown');
@@ -93,6 +103,14 @@ describe('3mf', () => {
     expect(r.filaments.map((f) => f.type)).toEqual(['PLA', 'PETG']);
     expect(r.totalWeightG).toBe(20.5);
   });
+  it('totals time and filament across plates', async () => {
+    // Shape of a real Bambu Studio 02.08 two-plate export.
+    const xml = `<config><plate><metadata key="index" value="1"/><metadata key="prediction" value="4817"/><filament id="1" type="PLA" used_m="25.73" used_g="77.98"/></plate><plate><metadata key="index" value="2"/><metadata key="prediction" value="4478"/><filament id="1" type="PLA" used_m="23.72" used_g="71.87"/></plate></config>`;
+    const r = await parseFile(makeZip({ 'Metadata/slice_info.config': xml }));
+    expect(r.printTimeSeconds).toBe(9295);
+    expect(r.totalWeightG).toBe(149.85);
+    expect(r.warnings.join(' ')).toMatch(/2 sliced plates/);
+  });
   it('reads stored entries', async () => {
     const r = await parseFile(makeZip({ 'Metadata/slice_info.config': sliceInfo }, true));
     expect(r.totalWeightG).toBe(20.5);
@@ -102,10 +120,62 @@ describe('3mf', () => {
     expect(r.totalWeightG).toBe(9.5);
     expect(r.printTimeSeconds).toBe(1800);
   });
+  it('reads G-code inside an UltiMaker .ufp package', async () => {
+    const r = await parseFile(makeZip({ '/3D/model.gcode': ';FLAVOR:Griffin\n;PRINT.TIME:600\n;EXTRUDER_TRAIN.0.MATERIAL.VOLUME_USED:1000\n;Generated with Cura_SteamEngine 5.7\n' }));
+    expect(r.slicer).toBe('cura');
+    expect(r.printTimeSeconds).toBe(600);
+    expect(r.totalWeightG).toBe(1.24);
+  });
   it('errors clearly on an unsliced 3MF', async () => {
     await expect(parseFile(makeZip({ '3D/3dmodel.model': '<model/>' }))).rejects.toThrow(/no print metadata/);
   });
   it('rejects corrupt zips', async () => {
     await expect(parseFile(new Uint8Array([0x50, 0x4b, 1, 2, 3, 4]))).rejects.toThrow();
+  });
+});
+
+/** Build a .bgcode file: header, then blocks of [type, compression, params, INI text]. */
+function makeBgcode(blocks: [number, number, string][], checksum = 1): Uint8Array {
+  const parts: Buffer[] = [Buffer.from('GCDE'), Buffer.alloc(6)];
+  parts[1].writeUInt32LE(1, 0);
+  parts[1].writeUInt16LE(checksum, 4);
+  for (const [type, compression, text] of blocks) {
+    const raw = Buffer.from(text);
+    const data = compression === 1 ? deflateSync(raw) : raw;
+    const h = Buffer.alloc(compression ? 12 : 8);
+    h.writeUInt16LE(type, 0);
+    h.writeUInt16LE(compression, 2);
+    h.writeUInt32LE(raw.length, 4);
+    if (compression) h.writeUInt32LE(data.length, 8);
+    parts.push(h, Buffer.alloc(type === 5 ? 6 : 2), data, Buffer.alloc(checksum === 1 ? 4 : 0));
+  }
+  return new Uint8Array(Buffer.concat(parts));
+}
+
+describe('bgcode', () => {
+  // Block layout mirrors a real PrusaSlicer 2.9 file: file, printer, thumbnail, print (deflate), slicer (deflate), gcode.
+  const blocks: [number, number, string][] = [
+    [0, 0, 'Producer=PrusaSlicer 2.9.0\n'],
+    [3, 0, 'printer_model=MINI\nfilament_type=ABS\n'],
+    [5, 0, 'PNGDATA'],
+    [4, 1, 'filament used [mm]=24826.34\nfilament used [g]=62.10\ntotal filament used [g]=62.10\nestimated printing time (normal mode)=7h 25m 7s\n'],
+    [2, 1, 'filament_density=1.04\nfilament_type=ABS\n'],
+    [1, 3, 'heatshrink gcode is never read'],
+  ];
+  it('reads print metadata from a PrusaSlicer .bgcode', async () => {
+    const r = await parseFile(makeBgcode(blocks));
+    expect(r.slicer).toBe('prusa');
+    expect(r.printTimeSeconds).toBe(7 * 3600 + 25 * 60 + 7);
+    expect(r.totalWeightG).toBe(62.1);
+    expect(r.filaments[0].type).toBe('ABS');
+    expect(r.warnings).toEqual([]);
+  });
+  it('handles files without checksums', async () => {
+    const r = await parseFile(makeBgcode(blocks, 0));
+    expect(r.totalWeightG).toBe(62.1);
+  });
+  it('rejects truncated files', async () => {
+    const b = makeBgcode(blocks);
+    await expect(parseFile(b.subarray(0, 40))).rejects.toThrow(/Corrupt/);
   });
 });

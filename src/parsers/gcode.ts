@@ -53,6 +53,20 @@ export function parseGcodeText(text: string): ParsedFile {
     }
   }
 
+  // --- Cura "Griffin" header (UltiMaker printers): time in seconds, filament as volume in mm^3 ---
+  const griffinTime = kv(/^;PRINT\.TIME:\s*(\d+)/);
+  if (printTimeSeconds === undefined && griffinTime !== undefined) printTimeSeconds = parseInt(griffinTime, 10);
+  const griffinVolumes: number[] = [];
+  for (const l of lines) {
+    const m = /^;EXTRUDER_TRAIN\.(\d+)\.MATERIAL\.VOLUME_USED:\s*([\d.]+)/.exec(l);
+    if (m) griffinVolumes[parseInt(m[1], 10)] = parseFloat(m[2]);
+  }
+  if (filaments.length === 0) {
+    for (const v of griffinVolumes) {
+      if (v > 0) filaments.push({ weightG: (v / 1000) * DEFAULT_DENSITY_G_CM3, weightEstimated: true });
+    }
+  }
+
   // --- Prusa / Orca / Bambu ---
   const gList = kv(/^;\s*filament used \[g\]\s*[=:]\s*(.+)$/i);
   const mmList = kv(/^;\s*filament used \[mm\]\s*[=:]\s*(.+)$/i);
@@ -101,7 +115,7 @@ export function parseGcodeText(text: string): ParsedFile {
     }
   });
   if (filaments.some((f) => f.weightEstimated)) {
-    warnings.push('Weight was estimated from filament length (assumes 1.75 mm, PLA density unless the file says otherwise). Check it against your slicer.');
+    warnings.push('Weight was estimated from filament length or volume (assumes 1.75 mm, PLA density unless the file says otherwise). Check it against your slicer.');
   }
   if (filaments.length === 0) warnings.push('No filament usage found in this file. Enter it manually.');
   if (printTimeSeconds === undefined) warnings.push('No print time found in this file. Enter it manually.');
