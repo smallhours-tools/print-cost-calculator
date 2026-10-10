@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filament cost per gram and per meter, by material</title>
+  <meta name="description" content="How to work out filament cost per gram and per meter, with real densities for PLA, PETG, ABS, ASA, PC, TPU and carbon-fiber blends, and a cost table for any spool price.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/filament-cost-per-gram/">
+  <meta property="og:title" content="Filament cost per gram and per meter, by material">
+  <meta property="og:description" content="Real densities, grams per meter and a cost table for any spool price.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/filament-cost-per-gram/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › Guides</header>
+  <main>
+    <h1>Filament cost per gram and per meter</h1>
+    <p>For a 1 kg spool, the cost per gram is simply the spool price divided by 1000: a 20 per kg spool costs 0.02 per gram, so a 50 g print uses 1.00 of filament. The catch is that slicers often report filament in <em>meters</em>, and how much a meter weighs depends on the material.</p>
+
+    <h2>The formulas</h2>
+    <ul>
+      <li><strong>Cost per gram</strong> = spool price ÷ grams of filament on the spool (not counting the spool itself).</li>
+      <li><strong>Grams per meter</strong> (1.75 mm filament) = 2.405 × density in g/cm³. For 2.85 mm filament use 6.379 × density.</li>
+      <li><strong>Cost of a print</strong> = grams used × cost per gram, plus an allowance for purge, failed prints and supports you throw away.</li>
+    </ul>
+    <p class="note">2.405 is the volume in cm³ of one meter of 1.75 mm filament: π × (0.0875 cm)² × 100 cm. The same for 2.85 mm gives 6.379.</p>
+
+    <h2>Density and grams per meter by material (1.75 mm)</h2>
+    <p>Densities are the values Bambu Lab ships in its slicer profiles, which slicers use to turn length into weight. Other brands are close but not identical; check your spool's data sheet.</p>
+    <section class="scroll" aria-label="Density and weight per meter by material" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Material (profile)</th><th scope="col">Density g/cm³</th><th scope="col">Weight per meter</th><th scope="col">Meters per kg</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">PLA (Bambu PLA Basic)</th><td>1.26</td><td>3.03 g</td><td>330 m</td></tr>
+          <tr><th scope="row">PLA, matte (Bambu PLA Matte)</th><td>1.32</td><td>3.17 g</td><td>315 m</td></tr>
+          <tr><th scope="row">PLA-CF (Bambu PLA-CF)</th><td>1.22</td><td>2.93 g</td><td>341 m</td></tr>
+          <tr><th scope="row">PETG (Bambu PETG Basic)</th><td>1.25</td><td>3.01 g</td><td>333 m</td></tr>
+          <tr><th scope="row">PETG HF (Bambu PETG HF)</th><td>1.28</td><td>3.08 g</td><td>325 m</td></tr>
+          <tr><th scope="row">ABS (generic Bambu profile)</th><td>1.04</td><td>2.50 g</td><td>400 m</td></tr>
+          <tr><th scope="row">ASA (Bambu ASA)</th><td>1.05</td><td>2.53 g</td><td>396 m</td></tr>
+          <tr><th scope="row">PC (Bambu PC)</th><td>1.185</td><td>2.85 g</td><td>351 m</td></tr>
+          <tr><th scope="row">TPU 95A (Bambu TPU 95A)</th><td>1.22</td><td>2.93 g</td><td>341 m</td></tr>
+          <tr><th scope="row">PA6-CF (Bambu PA6-CF)</th><td>1.1</td><td>2.65 g</td><td>378 m</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p>So 1 kg of ASA is about a quarter longer than 1 kg of matte PLA. If you price by length, the material matters; if you price by weight, it doesn't.</p>
+
+    <h2>Cost per gram at your spool price</h2>
+    <p>Works in any currency. Assumes 1 kg of filament on the spool.</p>
+    <section class="scroll" aria-label="Cost per gram at different spool prices" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Spool price</th><th scope="col">Per gram</th><th scope="col">10 g</th><th scope="col">50 g</th><th scope="col">100 g</th><th scope="col">250 g</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">15 per kg</th><td>0.015</td><td>0.15</td><td>0.75</td><td>1.50</td><td>3.75</td></tr>
+          <tr><th scope="row">20 per kg</th><td>0.020</td><td>0.20</td><td>1.00</td><td>2.00</td><td>5.00</td></tr>
+          <tr><th scope="row">25 per kg</th><td>0.025</td><td>0.25</td><td>1.25</td><td>2.50</td><td>6.25</td></tr>
+          <tr><th scope="row">30 per kg</th><td>0.030</td><td>0.30</td><td>1.50</td><td>3.00</td><td>7.50</td></tr>
+          <tr><th scope="row">40 per kg</th><td>0.040</td><td>0.40</td><td>2.00</td><td>4.00</td><td>10.00</td></tr>
+          <tr><th scope="row">60 per kg</th><td>0.060</td><td>0.60</td><td>3.00</td><td>6.00</td><td>15.00</td></tr>
+          <tr><th scope="row">80 per kg</th><td>0.080</td><td>0.80</td><td>4.00</td><td>8.00</td><td>20.00</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h2>What people forget</h2>
+    <ul>
+      <li><strong>Waste.</strong> Purge towers, multi-color flushing, brims, supports and the occasional failed print are paid for too. A 5 to 10 percent allowance is a common starting point; multi-color prints can waste far more.</li>
+      <li><strong>Spool weight.</strong> "1 kg" means 1 kg of filament; the empty spool weighs extra. Some cheaper spools hold less, such as 800 g, so divide by what is actually on it.</li>
+      <li><strong>Shipping and tax</strong> on the filament belong in the price per kg.</li>
+    </ul>
+
+    <div class="cta">
+      <p><strong>Skip the arithmetic.</strong> Drop a sliced file (G-code, .bgcode, 3MF or .ufp) into the <a href="../../">free 3D print cost calculator</a>. It reads the filament used straight from your slicer, applies your spool price and waste allowance, and adds electricity, wear, labor and fees. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li>Bambu Lab filament profiles as shipped in OrcaSlicer: <a href="https://github.com/SoftFever/OrcaSlicer/tree/main/resources/profiles/BBL/filament">resources/profiles/BBL/filament</a> (<code>filament_density</code> in each <code>@base</code> profile; ABS from the generic <code>fdm_filament_abs</code> profile).</li>
+      <li>Weight per meter calculated from the nominal 1.75 mm and 2.85 mm diameters.</li>
+    </ul>
+    <p class="note">Densities checked 10 October 2026. Written by an AI agent (Claude) from the sources above.</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
