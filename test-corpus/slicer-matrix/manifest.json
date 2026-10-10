@@ -1,0 +1,360 @@
+{
+ "generated": "2026-10-10",
+ "slicers": {
+  "PrusaSlicer": "2.9.6 (MK4S, Prusament PLA/PETG)",
+  "Bambu Studio": "02.08.02.61 (P1S, Bambu PLA Basic / PETG HF)",
+  "OrcaSlicer": "2.4.2 (Creality K1C, Creality Generic PLA/PETG)"
+ },
+ "files": [
+  {
+   "file": "B01_cube.gcode.3mf",
+   "case": "B01_cube",
+   "committed": true,
+   "bytes": 59400,
+   "stated_weight_g": 3.74,
+   "stated_time_s": 527,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B01_cube.plate_1.gcode",
+   "case": "B01_cube",
+   "committed": true,
+   "bytes": 213828,
+   "stated_weight_g": 3.74,
+   "stated_time_s": 527,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B02_petg.gcode.3mf",
+   "case": "B02_petg",
+   "committed": true,
+   "bytes": 62956,
+   "stated_weight_g": 3.68,
+   "stated_time_s": 1093,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B02_petg.plate_1.gcode",
+   "case": "B02_petg",
+   "committed": true,
+   "bytes": 239969,
+   "stated_weight_g": 3.68,
+   "stated_time_s": 1093,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B03_tiny.gcode.3mf",
+   "case": "B03_tiny",
+   "committed": true,
+   "bytes": 31205,
+   "stated_weight_g": 0.15,
+   "stated_time_s": 99,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B03_tiny.plate_1.gcode",
+   "case": "B03_tiny",
+   "committed": true,
+   "bytes": 62525,
+   "stated_weight_g": 0.15,
+   "stated_time_s": 99,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B04_supports.gcode.3mf",
+   "case": "B04_supports",
+   "committed": true,
+   "bytes": 75190,
+   "stated_weight_g": 7.26,
+   "stated_time_s": 1071,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B04_supports.plate_1.gcode",
+   "case": "B04_supports",
+   "committed": true,
+   "bytes": 437160,
+   "stated_weight_g": 7.26,
+   "stated_time_s": 1071,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B05_vase.gcode.3mf",
+   "case": "B05_vase",
+   "committed": true,
+   "bytes": 170935,
+   "stated_weight_g": 8.67,
+   "stated_time_s": 1804,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B05_vase.plate_1.gcode",
+   "case": "B05_vase",
+   "committed": true,
+   "bytes": 1510460,
+   "stated_weight_g": 8.67,
+   "stated_time_s": 1804,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B06_long.gcode.3mf",
+   "case": "B06_long",
+   "committed": true,
+   "bytes": 2399635,
+   "stated_weight_g": 1666.63,
+   "stated_time_s": 77519,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B06_long.plate_1.gcode",
+   "case": "B06_long",
+   "committed": false,
+   "bytes": 10228987,
+   "stated_weight_g": 1666.63,
+   "stated_time_s": 77519,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "B07_project_unsliced.3mf",
+   "case": "B07_project_unsliced",
+   "committed": true,
+   "bytes": 21400,
+   "stated_weight_g": null,
+   "stated_time_s": null,
+   "expect": "reject",
+   "reject_message": "This Bambu Studio / OrcaSlicer project hasn't been sliced, so it has no print time or filament use yet. Slice it and save the project, or use File > Export > Export plate sliced file, then drop that in."
+  },
+  {
+   "file": "O01_cube.gcode.3mf",
+   "case": "O01_cube",
+   "committed": true,
+   "bytes": 30329,
+   "stated_weight_g": 3.62,
+   "stated_time_s": 1030,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O01_cube.plate_1.gcode",
+   "case": "O01_cube",
+   "committed": true,
+   "bytes": 240780,
+   "stated_weight_g": 3.62,
+   "stated_time_s": 1030,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O02_petg.gcode.3mf",
+   "case": "O02_petg",
+   "committed": true,
+   "bytes": 30459,
+   "stated_weight_g": 3.6,
+   "stated_time_s": 1410,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O02_petg.plate_1.gcode",
+   "case": "O02_petg",
+   "committed": true,
+   "bytes": 241732,
+   "stated_weight_g": 3.6,
+   "stated_time_s": 1410,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O03_tiny.gcode.3mf",
+   "case": "O03_tiny",
+   "committed": true,
+   "bytes": 20420,
+   "stated_weight_g": 0.16,
+   "stated_time_s": 218,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O03_tiny.plate_1.gcode",
+   "case": "O03_tiny",
+   "committed": true,
+   "bytes": 74124,
+   "stated_weight_g": 0.16,
+   "stated_time_s": 218,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O04_supports.gcode.3mf",
+   "case": "O04_supports",
+   "committed": true,
+   "bytes": 47621,
+   "stated_weight_g": 7.42,
+   "stated_time_s": 1691,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O04_supports.plate_1.gcode",
+   "case": "O04_supports",
+   "committed": true,
+   "bytes": 526651,
+   "stated_weight_g": 7.42,
+   "stated_time_s": 1691,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O05_vase.gcode.3mf",
+   "case": "O05_vase",
+   "committed": true,
+   "bytes": 160144,
+   "stated_weight_g": 8.87,
+   "stated_time_s": 3514,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O05_vase.plate_1.gcode",
+   "case": "O05_vase",
+   "committed": true,
+   "bytes": 1612112,
+   "stated_weight_g": 8.87,
+   "stated_time_s": 3514,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O06_long.gcode.3mf",
+   "case": "O06_long",
+   "committed": true,
+   "bytes": 2264079,
+   "stated_weight_g": 1645.88,
+   "stated_time_s": 80905,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O06_long.plate_1.gcode",
+   "case": "O06_long",
+   "committed": false,
+   "bytes": 10044131,
+   "stated_weight_g": 1645.88,
+   "stated_time_s": 80905,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "O07_project_unsliced.3mf",
+   "case": "O07_project_unsliced",
+   "committed": true,
+   "bytes": 9753,
+   "stated_weight_g": null,
+   "stated_time_s": null,
+   "expect": "reject",
+   "reject_message": "This Bambu Studio / OrcaSlicer project hasn't been sliced, so it has no print time or filament use yet. Slice it and save the project, or use File > Export > Export plate sliced file, then drop that in."
+  },
+  {
+   "file": "P01_cube_bgcode.bgcode",
+   "case": "P01_cube_bgcode",
+   "committed": true,
+   "bytes": 30181,
+   "stated_weight_g": 3.78,
+   "stated_time_s": 934,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P02_cube_gcode.gcode",
+   "case": "P02_cube_gcode",
+   "committed": true,
+   "bytes": 183093,
+   "stated_weight_g": 3.78,
+   "stated_time_s": 934,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P03_cube_petg.gcode",
+   "case": "P03_cube_petg",
+   "committed": true,
+   "bytes": 199959,
+   "stated_weight_g": 3.87,
+   "stated_time_s": 1032,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P04_tiny.gcode",
+   "case": "P04_tiny",
+   "committed": true,
+   "bytes": 48941,
+   "stated_weight_g": 0.19,
+   "stated_time_s": 100,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P05_supports.gcode",
+   "case": "P05_supports",
+   "committed": true,
+   "bytes": 403938,
+   "stated_weight_g": 7.02,
+   "stated_time_s": 1613,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P06_vase.gcode",
+   "case": "P06_vase",
+   "committed": true,
+   "bytes": 1576913,
+   "stated_weight_g": 9.65,
+   "stated_time_s": 3422,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P07_long.gcode",
+   "case": "P07_long",
+   "committed": false,
+   "bytes": 8998643,
+   "stated_weight_g": 1673.52,
+   "stated_time_s": 100355,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P08_bgcode_as_gcode.gcode",
+   "case": "P08_bgcode_as_gcode",
+   "committed": true,
+   "bytes": 30181,
+   "stated_weight_g": 3.78,
+   "stated_time_s": 934,
+   "expect": "parse",
+   "reject_message": null
+  },
+  {
+   "file": "P09_project_3mf.3mf",
+   "case": "P09_project_3mf",
+   "committed": true,
+   "bytes": 2101,
+   "stated_weight_g": null,
+   "stated_time_s": null,
+   "expect": "reject",
+   "reject_message": "PrusaSlicer project files don't store print results. Slice it, export G-code (.gcode or .bgcode) and drop that in."
+  }
+ ]
+}
