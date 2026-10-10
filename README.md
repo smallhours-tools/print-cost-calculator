@@ -7,7 +7,7 @@ slicer metadata (Bambu Studio, OrcaSlicer, PrusaSlicer, Cura). It then works out
 electricity, machine wear, labor, and marketplace fees, and suggests a sale price.
 Manual entry always works as a fallback.
 
-- No server, no accounts, no tracking. Your files never leave your browser.
+- No server, no accounts, no cookies. Page views are counted with Cloudflare Web Analytics (no cookies, no fingerprinting). Your files never leave your browser.
 - Presets are stored only in your browser's localStorage.
 
 ## Development
