@@ -33,7 +33,7 @@ describe('slicer-matrix corpus', () => {
       expect(r.slicer).toBe(f.expect_slicer);
       expect(Math.abs((r.totalWeightG ?? NaN) - f.stated_weight_g!)).toBeLessThanOrEqual(0.01);
       expect(Math.abs((r.printTimeSeconds ?? NaN) - f.stated_time_s!)).toBeLessThanOrEqual(1);
-      expect(r.warnings.filter((w) => /No print time|No filament/.test(w))).toEqual([]);
+      expect(r.warnings.filter((w) => /No print time|No filament|not plausible|per print hour|density|doesn't match/.test(w))).toEqual([]);
     });
   }
 
