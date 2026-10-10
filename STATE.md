@@ -5,6 +5,9 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 ## NEEDS_OWNER
 - None (Pages is live and private vulnerability reporting is enabled, both checked 2026-10-10).
 
+## Run 2026-10-10 (10:38 UTC, Opus)
+hq t024: fourth guide, public/guides/printer-wear-cost/: how to work out wear per print hour from your own numbers (depreciation = net price ÷ expected hours; maintenance = sum of part price ÷ interval), any-price depreciation table, a maintenance worksheet with clearly made-up numbers, and an honest note that the calculator's 400 / 4,000 h / 0.05 defaults are placeholders (no maker publishes lifetimes in hours; t023's probe). guides.test.ts recomputes every table and worked figure and ties the defaults paragraph to DEFAULTS (mutation-checked). Linked from the calculator's Guides list and the pricing guide; sitemap; Article JSON-LD. Axe clean light/dark, 320 px OK.
+
 ## Run 2026-10-10 (09:10 UTC, Opus)
 hq t015 (#36): third guide, public/guides/how-to-price-3d-prints/: the cost model step by step, divide-don't-add for margin and fees, a worked example on PrusaSlicer's test.bgcode (62.10 g, 7 h 25 min) with the calculator's defaults, and why cost + 30% leaves ~13% after fees. cost.test.ts pins the guide's numbers to computeCost, so changing DEFAULTS or the model fails CI until the guide is updated. No platform fee rates (Etsy guide waits for t011's local fee check). Axe clean light/dark, 320 px OK.
 Then hq t016 (#38): `./#g=<grams>&s=<seconds>` opens the calculator with that job (src/hash.ts; weight/time only, cost settings never come from the URL); both guides link their examples into the calculator. Fixed an electricity-guide slip (1 kWh at 0.18 said 0.19). Then hq t018: src/guides.test.ts recomputes every guide table from its stated inputs (mutation-checked), and the electricity intro now says 15-20¢ (80-110 W), not 18-20¢.
