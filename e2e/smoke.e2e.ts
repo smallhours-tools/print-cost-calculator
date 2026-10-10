@@ -200,6 +200,10 @@ test('pricing guide links open the calculator with the example job (hq t016)', a
   await expect(page.locator('#f-mins')).toHaveValue('25');
   // Same as the guide's table with the default settings.
   await expect(page.locator('#price')).toHaveText('$ 8.31');
+  await page.goto('/guides/electricity-cost/');
+  await page.getByRole('link', { name: 'Open this 100 g, 10-hour print in the calculator' }).click();
+  await expect(page.locator('#f-weightG')).toHaveValue('100');
+  await expect(page.locator('#f-hours')).toHaveValue('10');
   // Cost settings never come from the URL.
   await page.goto('/#g=10&feePct=90');
   await expect(page.locator('#f-feePct')).toHaveValue('6.5');
