@@ -51,3 +51,19 @@ cube_10mm_petg.gcode exposed a bug: its profile has no density, so the slicer wr
   https://wiki.bambulab.com/en/general/power-consumption
 
 The calculator defaults to 100 W, the typical PLA figure from these sources.
+
+## Unsliced and project 3MFs (checked 2026-10-10)
+
+These files carry no print results, so the parser must explain what to do instead of failing generically.
+
+| File | Source | What it is | Result |
+|---|---|---|---|
+| box.3mf, cube_gears.3mf | [3MFConsortium/3mf-samples examples/core](https://github.com/3MFConsortium/3mf-samples/tree/master/examples/core) | plain model | "This is a 3D model, not a sliced file..." |
+| flowrate-test-pass1.3mf, -pass2.3mf | [SoftFever/OrcaSlicer resources/calib/filament_flow](https://github.com/SoftFever/OrcaSlicer/tree/main/resources/calib/filament_flow) | plain model written by OrcaSlicer (zip64) | same; used to fail with "Corrupt zip directory" |
+| Büchse.3mf | [prusa3d/PrusaSlicer tests/data/test_3mf/Geräte](https://github.com/prusa3d/PrusaSlicer/tree/master/tests/data/test_3mf) | plain model | same |
+| seam_test_object.3mf | [prusa3d/PrusaSlicer tests/data](https://github.com/prusa3d/PrusaSlicer/tree/master/tests/data) | PrusaSlicer project (Metadata/Slic3r_PE.config) | "PrusaSlicer project files don't store print results..." |
+| cube_h2c.gcode.3mf, two_plates_h2c.gcode.3mf | BambuMate fixtures (above) | sliced Bambu exports, re-checked | unchanged: 843 s / 3.69 g, 9295 s / 149.85 g |
+
+The OrcaSlicer files exposed a real bug: OrcaSlicer writes **zip64** archives (sizes and offsets in a zip64 extra field), which the zip reader didn't support, so every Orca-written 3MF was rejected. Fixed with zip64 support in src/parsers/zip.ts.
+
+Still missing real samples (synthetic fixtures only): a Bambu Studio / OrcaSlicer project saved **before** slicing (project_settings.config, slice_info without `prediction`) and a Cura project (`Cura/` entries). Finding them needs GitHub code search, so a local session.

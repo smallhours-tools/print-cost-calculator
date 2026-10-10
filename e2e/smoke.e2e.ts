@@ -26,6 +26,24 @@ test('free calculator reads a G-code file and prices it', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+/** One-entry stored zip, enough to look like a plain 3D-model 3MF. */
+function modelOnly3mf(): Buffer {
+  const name = Buffer.from('3D/3dmodel.model'), data = Buffer.from('<model/>');
+  const lh = Buffer.alloc(30); lh.writeUInt32LE(0x04034b50, 0); lh.writeUInt32LE(data.length, 18); lh.writeUInt32LE(data.length, 22); lh.writeUInt16LE(name.length, 26);
+  const ch = Buffer.alloc(46); ch.writeUInt32LE(0x02014b50, 0); ch.writeUInt32LE(data.length, 20); ch.writeUInt32LE(data.length, 24); ch.writeUInt16LE(name.length, 28);
+  const cdOffset = 30 + name.length + data.length;
+  const end = Buffer.alloc(22); end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(1, 8); end.writeUInt16LE(1, 10); end.writeUInt32LE(46 + name.length, 12); end.writeUInt32LE(cdOffset, 16);
+  return Buffer.concat([lh, name, data, ch, name, end]);
+}
+
+test('an unsliced 3MF gets a plain explanation, not a generic error', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/');
+  await page.setInputFiles('#file', { name: 'model.3mf', mimeType: 'application/octet-stream', buffer: modelOnly3mf() });
+  await expect(page.locator('#file-status')).toHaveText(/^This is a 3D model, not a sliced file\..*Enter weight and time manually below\.$/);
+  expect(errors).toEqual([]);
+});
+
 test('no sideways scroll on a 320px phone', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto('/');

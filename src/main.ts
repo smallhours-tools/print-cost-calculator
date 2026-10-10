@@ -72,7 +72,11 @@ async function handleFile(file: File) {
     status.textContent = [...bits, ...parsed.warnings].join(' · ');
     render();
   } catch (e) {
-    status.textContent = `Could not read that file${e instanceof Error && e.message ? ` (${e.message})` : ''}. Enter weight and time manually below.`;
+    const msg = e instanceof Error ? e.message : '';
+    // Messages written as full sentences (e.g. "This project hasn't been sliced...") read better on their own.
+    status.textContent = /[.!?]$/.test(msg)
+      ? `${msg} Enter weight and time manually below.`
+      : `Could not read that file${msg ? ` (${msg})` : ''}. Enter weight and time manually below.`;
   }
 }
 
