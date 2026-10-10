@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS } from './cost';
+import { parseGcodeText } from './parsers/gcode';
+import { parseSliceInfo } from './parsers/threemf';
 
 // Written by an AI agent (Claude): recomputes the guides' tables from their own stated inputs, so an arithmetic
 // slip or an edited input can't ship (hq t018 found "0.19" where 1 kWh at 0.18 is 0.18).
@@ -113,5 +115,37 @@ describe('printer wear guide', () => {
   it('describes the calculator defaults correctly', () => {
     expect(html).toContain(`starts with a ${DEFAULTS.printerCost} printer over ${DEFAULTS.printerLifetimeHours.toLocaleString('en-US')} hours (${(DEFAULTS.printerCost / DEFAULTS.printerLifetimeHours).toFixed(2)} per hour) and ${DEFAULTS.maintenancePerHour} per hour of maintenance, so ${(DEFAULTS.printerCost / DEFAULTS.printerLifetimeHours + DEFAULTS.maintenancePerHour).toFixed(2)} per print hour`);
     expect(html).toContain('href="../../#g=62.1&amp;s=26707"');
+  });
+});
+
+describe('slicer metadata guide', () => {
+  // Written by an AI agent (Claude): the quoted lines must parse to the numbers the guide states (hq t027).
+  const html = text('slicer-print-time-and-filament');
+  const pre = (label: string) => {
+    const m = html.match(new RegExp(`<pre tabindex="0" aria-label="${label}">([\\s\\S]*?)</pre>`));
+    return m![1].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+  };
+  const grams = (f: { weightG?: number }[]) => f.reduce((s, x) => s + (x.weightG ?? 0), 0).toFixed(2);
+  it('PrusaSlicer footer', () => {
+    const r = parseGcodeText(pre('PrusaSlicer G-code footer lines'));
+    expect([r.printTimeSeconds, grams(r.filaments)]).toEqual([4843, '10.18']);
+  });
+  it('Cura Marlin header and its length-to-grams table', () => {
+    const r = parseGcodeText(pre('Cura G-code header lines'));
+    expect([r.printTimeSeconds, grams(r.filaments)]).toEqual([870, '3.23']);
+    const cm3 = Math.PI * 0.0875 ** 2 * 108.208;
+    expect(html).toContain(`<td>${cm3.toFixed(3)} cm³</td>`);
+    for (const d of [1.24, 1.26]) expect(html).toContain(`at ${d} g/cm³</th><td>${(cm3 * d).toFixed(2)} g</td>`);
+  });
+  it('Cura Griffin header', () => {
+    const r = parseGcodeText(pre('Cura Griffin header lines'));
+    expect([r.printTimeSeconds, grams(r.filaments)]).toEqual([92579, '94.89']);
+    expect(html).toContain(`<strong>${((76525 / 1000) * 1.24).toFixed(2)} g</strong>`);
+    expect(html).toContain(`is ${Math.floor(92579 / 3600)} h ${Math.floor((92579 % 3600) / 60)} min`);
+  });
+  it('Bambu slice_info', () => {
+    const r = parseSliceInfo(`<plate>${pre('Bambu Studio slice_info.config lines')}</plate>`);
+    expect([r.printTimeSeconds, grams(r.filaments)]).toEqual([843, '3.69']);
+    expect(html).toContain(`843 s is ${Math.floor(843 / 60)} min ${843 % 60} s`);
   });
 });

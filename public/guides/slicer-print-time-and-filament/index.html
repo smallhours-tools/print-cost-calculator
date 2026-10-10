@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Print time and filament weight in G-code and 3MF files: where each slicer writes them</title>
+  <meta name="description" content="Where PrusaSlicer, OrcaSlicer, Cura and Bambu Studio write the estimated print time and filament use inside G-code, .bgcode and 3MF files, with the exact lines from real files and how to turn length or volume into grams.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/">
+  <meta property="og:title" content="Where to find print time and filament weight in G-code and 3MF files">
+  <meta property="og:description" content="The exact lines PrusaSlicer, OrcaSlicer, Cura and Bambu Studio write, taken from real files, and how to get grams from them.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Where to find print time and filament weight in G-code and 3MF files", "description": "Where PrusaSlicer, OrcaSlicer, Cura and Bambu Studio write the estimated print time and filament use inside G-code, .bgcode and 3MF files, with the exact lines from real files and how to turn length or volume into grams.", "url": "https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    pre{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.85rem} pre:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › Guides</header>
+  <main>
+    <h1>Where to find print time and filament weight in G-code and 3MF files</h1>
+    <p>When a slicer exports a print, it writes its own estimate of the print time and the filament used into the file. You can read those numbers back without opening the slicer, which helps when you price an old job, check a file someone sent you, or batch-cost a folder of prints. Each slicer does it differently, though: different places, different units, and sometimes no weight at all.</p>
+    <p>Every example below is copied from a real, public file (listed under Sources). G-code is plain text, so you can open it in any text editor and search for the line.</p>
+
+    <h2>PrusaSlicer, SuperSlicer and OrcaSlicer G-code</h2>
+    <p>The totals are comments near the <strong>end</strong> of the file. This is from a PrusaSlicer 2.9 file:</p>
+    <pre tabindex="0" aria-label="PrusaSlicer G-code footer lines">; filament used [mm] = 4069.40
+; filament used [cm3] = 9.79
+; filament used [g] = 10.18
+; total filament used [g] = 10.18
+; estimated printing time (normal mode) = 1h 20m 43s</pre>
+    <p>OrcaSlicer writes the same keys (it descends from PrusaSlicer) and also repeats the print time near the top of the file. With several extruders, each line holds one value per extruder, separated by commas.</p>
+    <p class="note">Watch out: if the filament profile has no density set, the slicer writes <code>filament used [g] = 0.00</code>. Then multiply the <code>[cm3]</code> figure by your filament's density (see <a href="../filament-cost-per-gram/">filament cost per gram</a>).</p>
+
+    <h2>PrusaSlicer binary G-code (.bgcode)</h2>
+    <p>Newer Prusa printers use binary G-code. It holds the same keys as above, but in compressed metadata blocks at the <strong>start</strong> of the file, so a text editor shows nothing useful. Open it in PrusaSlicer's G-code viewer, or drop it into the <a href="../../">calculator</a>, which reads those blocks in your browser.</p>
+
+    <h2>Cura (Marlin and Klipper printers)</h2>
+    <p>Cura puts its totals at the <strong>top</strong>, as print time in seconds and filament as a <em>length in meters</em>, with no weight:</p>
+    <pre tabindex="0" aria-label="Cura G-code header lines">;FLAVOR:Marlin
+;TIME:870
+;Filament used: 1.08208m</pre>
+    <p>The <code>;TIME_ELAPSED:</code> lines further down are progress markers for each layer, not the total. To get grams from the length, multiply by the filament's cross-section and density:</p>
+    <p><strong>grams = length in cm × π × (diameter ÷ 2)² × density</strong>, with the diameter in cm (1.75 mm = 0.175 cm) and the density in g/cm³.</p>
+    <section class="scroll" aria-label="Cura example: length to grams" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Step</th><th scope="col">Value</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Length</th><td>1.08208 m = 108.208 cm</td></tr>
+          <tr><th scope="row">Volume (1.75 mm filament)</th><td>2.603 cm³</td></tr>
+          <tr><th scope="row">Weight at 1.24 g/cm³</th><td>3.23 g</td></tr>
+          <tr><th scope="row">Weight at 1.26 g/cm³</th><td>3.28 g</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">PLA densities in slicer profiles run from about 1.22 to 1.32 g/cm³, so the grams depend a little on which you use. The calculator uses 1.24 for PLA when the file gives no weight and tells you the weight was estimated.</p>
+
+    <h2>Cura for UltiMaker printers ("Griffin" flavor)</h2>
+    <p>For UltiMaker printers, Cura writes a different header: time in seconds and filament as a <em>volume in cubic millimeters</em>, one line per extruder:</p>
+    <pre tabindex="0" aria-label="Cura Griffin header lines">;FLAVOR:Griffin
+;EXTRUDER_TRAIN.0.MATERIAL.VOLUME_USED:76525
+;PRINT.TIME:92579</pre>
+    <p>Divide the volume by 1,000 to get cm³, then multiply by the density: 76,525 mm³ is 76.525 cm³, which is <strong>94.89 g</strong> at 1.24 g/cm³. The time, 92,579 seconds, is 25 h 42 min.</p>
+
+    <h2>Bambu Studio and OrcaSlicer 3MF exports</h2>
+    <p>A sliced 3MF (Bambu Studio's "Export plate sliced file", usually named <code>.gcode.3mf</code>) is a zip archive. Rename a copy to <code>.zip</code> to look inside. The totals are in <code>Metadata/slice_info.config</code>, one <code>&lt;plate&gt;</code> section per sliced plate:</p>
+    <pre tabindex="0" aria-label="Bambu Studio slice_info.config lines">&lt;metadata key="prediction" value="843"/&gt;
+&lt;metadata key="weight" value="3.69"/&gt;
+&lt;filament id="1" type="PLA" used_m="1.22" used_g="3.69" ... /&gt;</pre>
+    <p><code>prediction</code> is the print time in seconds (843 s is 14 min 3 s) and <code>used_g</code> the grams for each filament. For a project with several plates, add the plates up: the calculator does this for you, as in the two-plate example in the <a href="../filament-cost-per-gram/">filament guide</a>.</p>
+    <p>A 3MF saved as a <em>project</em> before slicing has no <code>prediction</code> at all, and a plain model 3MF has no print data. Slice it and export the sliced file first.</p>
+
+    <h2>Quick reference</h2>
+    <section class="scroll" aria-label="Where each slicer writes print time and filament use" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">File</th><th scope="col">Time</th><th scope="col">Filament</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">PrusaSlicer / OrcaSlicer G-code</th><td>end: h m s</td><td>end: mm, cm³, g</td></tr>
+          <tr><th scope="row">PrusaSlicer .bgcode</th><td>start, binary</td><td>start, binary</td></tr>
+          <tr><th scope="row">Cura, Marlin flavor</th><td>top: seconds</td><td>top: meters</td></tr>
+          <tr><th scope="row">Cura, Griffin flavor</th><td>top: seconds</td><td>top: mm³</td></tr>
+          <tr><th scope="row">Bambu / Orca .gcode.3mf</th><td>slice_info: seconds</td><td>slice_info: m, g</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p>These are the slicer's <em>estimates</em>. Real prints usually land close, but firmware acceleration settings and pauses can make the actual time differ.</p>
+
+    <div class="cta">
+      <p><strong>Skip the digging.</strong> Drop any of these files into the <a href="../../">free 3D print cost calculator</a>. It reads the time and filament as described above, converts length or volume to grams when it has to (and says so), and prices the print. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li>PrusaSlicer: <code>test.gcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a> (PrusaSlicer 2.9.0); the .bgcode description follows the <a href="https://github.com/prusa3d/libbgcode">libbgcode</a> specification.</li>
+      <li>OrcaSlicer: <code>orcaslicer.gcode</code> from <a href="https://github.com/mjonuschat/acceleration-control">mjonuschat/acceleration-control</a>, GCode folder.</li>
+      <li>Cura (Marlin): <code>xyzCalibration_cube.gcode</code> from <a href="https://github.com/YouMakeTech/klipper-ender3">YouMakeTech/klipper-ender3</a>, demo folder (Cura 4.11).</li>
+      <li>Cura (Griffin): <code>simple.gcode</code> from <a href="https://github.com/Ultimaker/GHermeneus/tree/master/resources">Ultimaker/GHermeneus, resources</a> (Cura 4.7).</li>
+      <li>Bambu Studio: <code>cube_h2c.gcode.3mf</code> from <a href="https://github.com/MichaelDanCurtis/BambuMate/tree/main/src-tauri/tests/fixtures/slicer">MichaelDanCurtis/BambuMate, test fixtures</a> (Bambu Studio 02.08).</li>
+      <li>PLA densities: see <a href="../filament-cost-per-gram/">filament cost per gram</a>.</li>
+    </ul>
+    <p class="note">Lines checked against the files on 10 October 2026. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
