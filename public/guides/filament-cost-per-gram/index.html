@@ -24,6 +24,7 @@
     a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
     .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
     .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .conv{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.6rem} .conv label{display:flex;flex-direction:column;gap:.2rem;font-size:.95rem} .conv input,.conv select{font:inherit;padding:.35rem;min-height:2.25rem;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:4px;width:100%}
     .note{color:var(--mut);font-size:.9rem}
   </style>
 </head>
@@ -61,6 +62,38 @@
       </table>
     </section>
     <p>So 1 kg of ASA is about a quarter longer than 1 kg of matte PLA. If you price by length, the material matters; if you price by weight, it doesn't.</p>
+
+    <section id="convert" aria-labelledby="convert-h" hidden>
+      <h2 id="convert-h">Convert filament length to weight</h2>
+      <p>Type a length or a weight and the other one updates. Useful when your slicer reports meters (Cura does) or when you want to know how much is left on a spool.</p>
+      <form class="conv" onsubmit="return false">
+        <label>Material <select id="cv-mat"></select></label>
+        <label>Diameter <select id="cv-dia"><option value="1.75">1.75 mm</option><option value="2.85">2.85 mm</option></select></label>
+        <label>Length (m) <input id="cv-len" type="number" min="0" step="any" inputmode="decimal" value="1"></label>
+        <label>Weight (g) <input id="cv-g" type="number" min="0" step="any" inputmode="decimal"></label>
+      </form>
+      <p id="cv-out" aria-live="polite"></p>
+    </section>
+    <script>
+      // Written by an AI agent (Claude): length <-> weight from the density table above (hq t028). Runs only in the browser.
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const mat = $('cv-mat'), dia = $('cv-dia'), len = $('cv-len'), g = $('cv-g'), out = $('cv-out');
+        for (const tr of document.querySelectorAll('section[aria-label^="Density"] tbody tr')) {
+          const o = document.createElement('option');
+          o.textContent = tr.querySelector('th').textContent;
+          o.value = tr.querySelector('td').textContent;
+          mat.append(o);
+        }
+        const gPerM = () => Math.PI * (parseFloat(dia.value) / 20) ** 2 * 100 * parseFloat(mat.value);
+        const show = (m, w) => { out.textContent = `${+m.toFixed(2)} m of ${dia.value} mm ${mat.selectedOptions[0].textContent} weighs about ${w.toFixed(1)} g (${gPerM().toFixed(2)} g per meter).`; };
+        const fromLen = () => { const m = Math.max(0, parseFloat(len.value) || 0); const w = m * gPerM(); g.value = +w.toFixed(1); show(m, w); };
+        const fromG = () => { const w = Math.max(0, parseFloat(g.value) || 0); const m = w / gPerM(); len.value = +m.toFixed(2); show(m, w); };
+        len.addEventListener('input', fromLen); g.addEventListener('input', fromG);
+        mat.addEventListener('change', fromLen); dia.addEventListener('change', fromLen);
+        $('convert').hidden = false; fromLen();
+      })();
+    </script>
 
     <h2>Cost per gram at your spool price</h2>
     <p>Works in any currency. Assumes 1 kg of filament on the spool.</p>

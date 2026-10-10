@@ -228,3 +228,23 @@ test('copy link to this job carries weight and time only (hq t022)', async ({ pa
   expect(copied).not.toContain('fee');
   expect(errors).toEqual([]);
 });
+
+test('filament guide converts length to weight and back (hq t028)', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/guides/filament-cost-per-gram/');
+  await expect(page.locator('#convert')).toBeVisible();
+  // 1 m of 1.75 mm PLA Basic (1.26 g/cm³): π × 0.0875² × 100 × 1.26 = 3.03 g, as in the table above it.
+  await expect(page.locator('#cv-g')).toHaveValue('3');
+  await expect(page.locator('#cv-out')).toContainText('3.03 g per meter');
+  await page.fill('#cv-len', '330');
+  await expect(page.locator('#cv-g')).toHaveValue('1000.1');
+  await page.fill('#cv-g', '1000');
+  await expect(page.locator('#cv-len')).toHaveValue('329.96');
+  await page.selectOption('#cv-dia', '2.85');
+  await expect(page.locator('#cv-out')).toContainText('8.04 g per meter');
+  await page.selectOption('#cv-mat', { label: 'ABS (generic Bambu profile)' });
+  await expect(page.locator('#cv-out')).toContainText('6.63 g per meter');
+  await page.fill('#cv-len', '-5');
+  await expect(page.locator('#cv-g')).toHaveValue('0');
+  expect(errors).toEqual([]);
+});
