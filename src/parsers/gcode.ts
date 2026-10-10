@@ -3,6 +3,9 @@ import { parseDuration } from './time';
 
 const DEFAULT_DIAMETER_MM = 1.75;
 const DEFAULT_DENSITY_G_CM3 = 1.24; // PLA
+// Typical densities (g/cm3) used as slicer defaults; only for files whose profile has no usable density.
+const TYPE_DENSITY: Record<string, number> = { PLA: 1.24, PETG: 1.27, ABS: 1.04, ASA: 1.07, TPU: 1.21, PC: 1.2, PA: 1.14, NYLON: 1.14 };
+const typeDensity = (t?: string) => (t ? TYPE_DENSITY[t.toUpperCase().split(/[-\s]/)[0]] : undefined);
 
 function numberList(s: string): number[] {
   return s
@@ -73,16 +76,19 @@ export function parseGcodeText(text: string): ParsedFile {
   const typeList = kv(/^;\s*filament_type\s*=\s*(.+)$/i);
   const diaList = kv(/^;\s*filament_diameter\s*=\s*(.+)$/i);
   const densList = kv(/^;\s*filament_density\s*=\s*(.+)$/i);
+  const cm3List = kv(/^;\s*filament used \[cm3\]\s*[=:]\s*(.+)$/i);
   if (gList !== undefined || mmList !== undefined) {
     filaments.length = 0;
     const g = gList ? numberList(gList) : [];
     const mm = mmList ? numberList(mmList) : [];
+    const cm3 = cm3List ? numberList(cm3List) : [];
     const types = typeList ? typeList.split(/[;,]/).map((t) => t.trim()) : [];
     const n = Math.max(g.length, mm.length);
     for (let i = 0; i < n; i++) {
       const f: FilamentUsage = {};
       if (g[i] !== undefined) f.weightG = g[i];
       if (mm[i] !== undefined) f.lengthMm = mm[i];
+      if (cm3[i] !== undefined && cm3[i] > 0) f.volumeCm3 = cm3[i];
       if (types[i]) f.type = types[i];
       filaments.push(f);
     }
@@ -105,15 +111,25 @@ export function parseGcodeText(text: string): ParsedFile {
     if (est) printTimeSeconds = parseDuration(est);
   }
 
-  // Derive weight from length when the file has no weight.
+  // Derive weight when the file has none. A reported 0 g with filament used means the profile had no density
+  // (e.g. OrcaSlicer with filament_density = 0), so treat it as missing too.
   const dia = diaList ? numberList(diaList) : [];
   const dens = densList ? numberList(densList) : [];
+  let noDensity = false;
   filaments.forEach((f, i) => {
-    if (f.weightG === undefined && f.lengthMm !== undefined) {
-      f.weightG = weightFromLength(f.lengthMm, dia[i] ?? dia[0] ?? DEFAULT_DIAMETER_MM, dens[i] ?? dens[0] ?? DEFAULT_DENSITY_G_CM3);
-      f.weightEstimated = true;
-    }
+    const used = (f.lengthMm ?? 0) > 0 || (f.volumeCm3 ?? 0) > 0;
+    if (f.weightG === 0 && used) delete f.weightG;
+    if (f.weightG !== undefined || !used) return;
+    const fileDensity = dens[i] ?? dens[0];
+    if (fileDensity !== undefined && !(fileDensity > 0)) noDensity = true;
+    const density = fileDensity !== undefined && fileDensity > 0 ? fileDensity : typeDensity(f.type) ?? DEFAULT_DENSITY_G_CM3;
+    f.weightG = f.volumeCm3 !== undefined
+      ? f.volumeCm3 * density
+      : weightFromLength(f.lengthMm!, dia[i] ?? dia[0] ?? DEFAULT_DIAMETER_MM, density);
+    f.weightEstimated = true;
   });
+  filaments.forEach((f) => delete f.volumeCm3);
+  if (noDensity) warnings.push('Your slicer profile has no filament density, so weight is estimated.');
   if (filaments.some((f) => f.weightEstimated)) {
     warnings.push('Weight was estimated from filament length or volume (assumes 1.75 mm, PLA density unless the file says otherwise). Check it against your slicer.');
   }
