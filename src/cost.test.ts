@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { computeCost, DEFAULTS } from './cost';
+import { computeCost, DEFAULTS, perHour } from './cost';
 
 describe('computeCost', () => {
   it('computes each component', () => {
@@ -38,4 +38,17 @@ describe('pricing guide worked example', () => {
     const markupFees = markup * DEFAULTS.feePct / 100 + DEFAULTS.feeFixed;
     expect([markup, markupFees, markup - r.subtotal - markupFees].map(c)).toEqual(['6.54', '0.67', '0.83']);
   });
+});
+
+describe('perHour', () => {
+  // Written by an AI agent (Claude): matches the cost-per-hour guide (0.165 per hour with defaults) and computeCost.
+  it('gives grams per hour and the machine rate', () => {
+    const i = { ...DEFAULTS, weightG: 62.1, printTimeHours: 26707 / 3600 };
+    const r = perHour(i)!;
+    expect(r.gramsPerHour.toFixed(1)).toBe('8.4');
+    expect(r.machinePerHour).toBeCloseTo(0.165, 10);
+    const c = computeCost(i);
+    expect(r.machinePerHour * i.printTimeHours).toBeCloseTo(c.electricity + c.wear, 10);
+  });
+  it('is undefined without a print time', () => expect(perHour({ ...DEFAULTS, weightG: 10 })).toBeUndefined());
 });

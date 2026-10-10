@@ -1,4 +1,4 @@
-import { computeCost, DEFAULTS, type CostInputs } from './cost';
+import { computeCost, DEFAULTS, perHour, type CostInputs } from './cost';
 import { parseFile } from './parsers/index';
 import { jobHash, parseHashJob } from './hash';
 import { powerHint } from './printer-power';
@@ -47,6 +47,12 @@ function render() {
     tr.append(th, td); body.append(tr);
   }
   $('price').textContent = `${cur} ${money(c.suggestedPrice)}`;
+  const rate = perHour(v);
+  $('per-hour').hidden = !rate;
+  if (rate) {
+    $('per-hour-text').textContent =
+      `Per print hour: ${rate.gramsPerHour.toFixed(1)} g of filament, and ${cur} ${money(rate.machinePerHour)} of machine cost (electricity + wear).`;
+  }
   try {
     const store: Record<string, number> = {};
     for (const k of keys) if (k !== 'weightG' && k !== 'printTimeHours') store[k] = v[k];

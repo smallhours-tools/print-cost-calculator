@@ -22,6 +22,8 @@ test('free calculator reads a G-code file and prices it', async ({ page }) => {
   await expect(page.locator('#f-mins')).toHaveValue('54');
   // Hand-checked with the default settings: (2.9027 + 0.25) / 0.635 = 4.96.
   await expect(page.locator('#price')).toHaveText('$ 4.96');
+  // hq t032: 12.1 g over 0.9 h; machine 0.1 kW × 0.15 + 400/4000 + 0.05 = 0.165 per hour.
+  await expect(page.locator('#per-hour-text')).toHaveText('Per print hour: 13.4 g of filament, and $ 0.17 of machine cost (electricity + wear).');
   await expect(page.locator('footer')).toContainText('Built and maintained by an AI agent (Claude), with human oversight.');
   expect(errors).toEqual([]);
 });

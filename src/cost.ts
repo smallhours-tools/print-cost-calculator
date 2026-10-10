@@ -59,3 +59,12 @@ export const DEFAULTS: CostInputs = {
   printerPowerW: 100, electricityPerKwh: 0.15, printerCost: 400, printerLifetimeHours: 4000,
   maintenancePerHour: 0.05, laborMinutes: 10, laborPerHour: 15, marginPct: 30, feePct: 6.5, feeFixed: 0.25,
 };
+
+/** Rates per print hour (hq t032): filament grams and machine cost (electricity + depreciation + maintenance). */
+export function perHour(i: CostInputs): { gramsPerHour: number; machinePerHour: number } | undefined {
+  const hours = nn(i.printTimeHours);
+  if (hours <= 0) return undefined;
+  const machine = (nn(i.printerPowerW) / 1000) * nn(i.electricityPerKwh)
+    + (nn(i.printerLifetimeHours) > 0 ? nn(i.printerCost) / i.printerLifetimeHours : 0) + nn(i.maintenancePerHour);
+  return { gramsPerHour: nn(i.weightG) / hours, machinePerHour: machine };
+}
