@@ -1,5 +1,6 @@
 import { computeCost, DEFAULTS, type CostInputs } from './cost';
 import { parseFile } from './parsers/index';
+import { powerHint } from './printer-power';
 import { proPreviewEnabled } from './pro/gate';
 
 const STORE = 'pcc.settings.v1';
@@ -59,6 +60,22 @@ function setTime(seconds?: number) {
   $<HTMLInputElement>('f-mins').value = seconds ? String(Math.round((seconds % 3600) / 60)) : '0';
 }
 
+/** Offer the manufacturer's average power for the file's printer, unless the power setting already matches it. */
+function showPowerHint(model?: string) {
+  const box = $('power-hint');
+  const hint = powerHint(model);
+  const current = parseFloat(input('printerPowerW').value);
+  box.hidden = !hint || current === hint.watts;
+  if (!hint || box.hidden) return;
+  $('power-hint-text').textContent =
+    `This file is for a ${hint.label}, which averages about ${hint.watts} W printing PLA (manufacturer figure; see the electricity guide). Your setting is ${Number.isFinite(current) ? current : 0} W.`;
+  $('power-hint-use').onclick = () => {
+    input('printerPowerW').value = String(hint.watts);
+    box.hidden = true;
+    render();
+  };
+}
+
 async function handleFile(file: File) {
   const status = $('file-status');
   status.textContent = 'Reading file locally…';
@@ -76,7 +93,9 @@ async function handleFile(file: File) {
     document.dispatchEvent(new CustomEvent('pcc:parsed', { detail: parsed.filaments.map((f) => ({ type: f.type, weightG: f.weightG })) }));
     // ...and this to preselect a saved printer (model and preset are cleaned short labels).
     document.dispatchEvent(new CustomEvent('pcc:printer', { detail: { model: parsed.printerModel, preset: parsed.printerPreset } }));
+    showPowerHint(parsed.printerModel);
   } catch (e) {
+    $('power-hint').hidden = true;
     const msg = e instanceof Error ? e.message : '';
     // Messages written as full sentences (e.g. "This project hasn't been sliced...") read better on their own.
     status.textContent = /[.!?]$/.test(msg)
