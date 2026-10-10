@@ -41,7 +41,9 @@ describe('slicer-matrix corpus', () => {
       } else expect(Math.abs((r.totalWeightG ?? NaN) - f.stated_weight_g)).toBeLessThanOrEqual(0.01 + 1e-9);
       if (f.stated_filament_g) expect(r.filaments.map((x) => x.weightG)).toEqual(f.stated_filament_g);
       expect(Math.abs((r.printTimeSeconds ?? NaN) - f.stated_time_s!)).toBeLessThanOrEqual(1);
-      expect(r.warnings.filter((w) => /No print time|No filament|not plausible|per print hour|density|doesn't match/.test(w))).toEqual([]);
+      // Cura files (no stated grams) legitimately carry the "Weight was estimated ... PLA density" note.
+      const expected = (w: string) => f.stated_weight_g === null && /^Weight was estimated/.test(w);
+      expect(r.warnings.filter((w) => !expected(w) && /No print time|No filament|not plausible|per print hour|density|doesn't match/.test(w))).toEqual([]);
     });
   }
 
