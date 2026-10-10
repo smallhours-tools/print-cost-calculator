@@ -149,3 +149,35 @@ describe('slicer metadata guide', () => {
     expect(html).toContain(`843 s is ${Math.floor(843 / 60)} min ${843 % 60} s`);
   });
 });
+
+describe('cost per print hour guide', () => {
+  // Written by an AI agent (Claude): the grams-per-hour table must match docs/reference-data.md, and the stated
+  // ranges and machine rate must follow from it and from DEFAULTS (hq t030).
+  const html = text('cost-per-print-hour');
+  const ref = new Map(
+    readFileSync('docs/reference-data.md', 'utf8').split('\n')
+      .map((l) => l.split('|').map((c) => c.trim()))
+      .filter((c) => c.length >= 6 && /^\d+$/.test(c[4]))
+      .map((c) => [c[1], { s: parseInt(c[4], 10), g: parseFloat(c[5]) }] as const)
+      .reverse(), // first occurrence wins
+  );
+  const r = rows(html).filter((x) => x[0].startsWith('<code>'));
+  it('table matches the reference data', () => {
+    expect(r.length).toBe(9);
+    for (const [file, , time, grams, perHour, cost] of r) {
+      const d = ref.get(file.replace(/<\/?code>/g, ''))!;
+      expect(d).toBeDefined();
+      const gph = d.g / (d.s / 3600);
+      expect([time, grams, perHour, cost]).toEqual([`${(d.s / 3600).toFixed(2)} h`, `${d.g.toFixed(2)} g`, `${gph.toFixed(1)} g/h`, (gph * 0.02).toFixed(2)]);
+    }
+  });
+  it('stated ranges and machine rate follow from the data', () => {
+    const gph = r.map(([file]) => { const d = ref.get(file.replace(/<\/?code>/g, ''))!; return d.g / (d.s / 3600); });
+    const lo = Math.min(...gph), hi = Math.max(...gph);
+    expect(html).toContain(`<strong>${lo.toFixed(1)} to ${hi.toFixed(1)} g per hour</strong>`);
+    expect(html).toContain(`from about ${(lo * 0.02).toFixed(2)} to ${(hi * 0.02).toFixed(2)} of filament per hour`);
+    const machine = (DEFAULTS.printerPowerW / 1000) * DEFAULTS.electricityPerKwh + DEFAULTS.printerCost / DEFAULTS.printerLifetimeHours + DEFAULTS.maintenancePerHour;
+    expect(html).toContain(`<strong>${machine.toFixed(3)} per print hour</strong>`);
+    expect(html).toContain(`costs <strong>${((DEFAULTS.printerPowerW / 1000) * 18.31).toFixed(1)}¢ per hour</strong>`);
+  });
+});

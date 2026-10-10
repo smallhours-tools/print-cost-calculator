@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3D printer cost per hour: electricity, wear and filament per print hour</title>
+  <meta name="description" content="The hourly cost of running a 3D printer: electricity and wear per print hour, plus how many grams of filament per hour real sliced files use (from under 4 to 58 g/h), and why pricing by the hour alone misleads.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/cost-per-print-hour/">
+  <meta property="og:title" content="What does a 3D printer cost per hour to run?">
+  <meta property="og:description" content="Electricity and wear per print hour, and how many grams per hour real sliced files use.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/cost-per-print-hour/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "What does a 3D printer cost per hour to run?", "description": "The hourly cost of running a 3D printer: electricity and wear per print hour, plus how many grams of filament per hour real sliced files use (from under 4 to 58 g/h), and why pricing by the hour alone misleads.", "url": "https://smallhourstools.com/print-cost-calculator/guides/cost-per-print-hour/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/cost-per-print-hour/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › <a href="../">Guides</a></header>
+  <main>
+    <h1>What does a 3D printer cost per hour to run?</h1>
+    <p>Part of the cost of running a printer really does scale with time: electricity and machine wear. Filament doesn't. How many grams a printer lays down per hour varies more than tenfold between jobs, so an hourly rate on its own is a poor way to price prints. Here are both halves, with real numbers.</p>
+
+    <h2>The machine: electricity plus wear per hour</h2>
+    <ul>
+      <li><strong>Electricity</strong> = average watts ÷ 1000 × price per kWh. A printer averaging 100 W at the US average of 18.31¢ per kWh costs <strong>1.8¢ per hour</strong>; at 0.15 per kWh (the calculator's default) it is 0.015. See <a href="../electricity-cost/">electricity cost per print</a> for measured watts by printer.</li>
+      <li><strong>Wear</strong> = depreciation plus maintenance per hour. The calculator's placeholder is 0.15 per hour (a 400 printer over 4,000 hours, plus 0.05 maintenance); <a href="../printer-wear-cost/">printer wear per hour</a> shows how to work out your own.</li>
+    </ul>
+    <p>With the calculator's defaults, the machine costs <strong>0.165 per print hour</strong>, and wear is about ten times the electricity. If you only count electricity, you undercount the machine by roughly that factor.</p>
+
+    <h2>The filament: grams per hour from real files</h2>
+    <p>We divided the slicer's filament weight by its print time for the real, public sliced files we use to test the calculator. The last column is the filament cost per hour at 20 per kg, before waste.</p>
+    <section class="scroll" aria-label="Filament used per print hour in real sliced files" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">File</th><th scope="col">Slicer, printer</th><th scope="col">Time</th><th scope="col">Filament</th><th scope="col">Per hour</th><th scope="col">Cost/h at 20/kg</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>simple.gcode</code></th><td>Cura, UltiMaker S5</td><td>25.72 h</td><td>94.89 g</td><td>3.7 g/h</td><td>0.07</td></tr>
+          <tr><th scope="row"><code>big.gcode</code></th><td>Cura, 2 extruders</td><td>98.24 h</td><td>447.65 g</td><td>4.6 g/h</td><td>0.09</td></tr>
+          <tr><th scope="row"><code>test.gcode</code></th><td>PrusaSlicer, Prusa MINI</td><td>1.35 h</td><td>10.18 g</td><td>7.6 g/h</td><td>0.15</td></tr>
+          <tr><th scope="row"><code>test_multimaterial.gcode</code></th><td>PrusaSlicer, 5 tools</td><td>8.60 h</td><td>68.67 g</td><td>8.0 g/h</td><td>0.16</td></tr>
+          <tr><th scope="row"><code>test.bgcode</code></th><td>PrusaSlicer, Prusa MINI</td><td>7.42 h</td><td>62.10 g</td><td>8.4 g/h</td><td>0.17</td></tr>
+          <tr><th scope="row"><code>xyzCalibration_cube.gcode</code></th><td>Cura, Marlin</td><td>0.24 h</td><td>3.23 g</td><td>13.4 g/h</td><td>0.27</td></tr>
+          <tr><th scope="row"><code>3DBenchy.gcode</code></th><td>PrusaSlicer, Prusa MINI</td><td>0.90 h</td><td>12.08 g</td><td>13.4 g/h</td><td>0.27</td></tr>
+          <tr><th scope="row"><code>cube_h2c.gcode.3mf</code></th><td>Bambu Studio, H2C</td><td>0.23 h</td><td>3.69 g</td><td>15.8 g/h</td><td>0.32</td></tr>
+          <tr><th scope="row"><code>two_plates_h2c.gcode.3mf</code></th><td>Bambu Studio, H2C</td><td>2.58 h</td><td>149.85 g</td><td>58.0 g/h</td><td>1.16</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">Times and weights are the slicers' own estimates as read by the calculator; Cura's weights are converted from length or volume at 1.24 g/cm³. Sources are listed in <a href="https://github.com/smallhours-tools/print-cost-calculator/blob/main/docs/reference-data.md">our reference data</a>.</p>
+    <p>The range is about <strong>3.7 to 58.0 g per hour</strong>. The PrusaSlicer files for the Prusa MINI run from 7.6 to 13.4 g/h, the two long Cura files for UltiMaker printers are under 5 g/h, and the two-plate Bambu Studio job for an H2C deposits 58 g/h. At 20 per kg that is anywhere from about 0.07 to 1.16 of filament per hour, while the machine cost stays at 0.165.</p>
+
+    <h2>So what is a fair hourly rate?</h2>
+    <p>There isn't a single one, because filament dominates on fast, heavy prints and the machine dominates on slow, light ones. Price each print from both instead:</p>
+    <p><strong>Cost = machine cost per hour × hours + grams × price per gram + your hands-on time</strong></p>
+    <p>Then add margin and fees as in <a href="../how-to-price-3d-prints/">how much to charge for a 3D print</a>. If you do want a rule of thumb for quoting before slicing, take the grams per hour of your own past jobs on that printer, not someone else's.</p>
+
+    <div class="cta">
+      <p><strong>Let the file do it.</strong> Drop a sliced file (G-code, .bgcode, 3MF or .ufp) into the <a href="../../">free 3D print cost calculator</a>. It reads hours and grams from the file and applies both rates. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li>Print times and filament weights: the real slicer files listed in <a href="https://github.com/smallhours-tools/print-cost-calculator/blob/main/docs/reference-data.md">docs/reference-data.md</a> (PrusaSlicer test data, UltiMaker GHermeneus, BambuMate test fixtures, YouMakeTech/klipper-ender3), read with this calculator's parser.</li>
+      <li>US average electricity price (18.31¢/kWh, EIA, July 2026) and printer watts: see <a href="../electricity-cost/">electricity cost per print</a>.</li>
+      <li>Wear: the calculator's editable defaults, not measured data; see <a href="../printer-wear-cost/">printer wear per hour</a>.</li>
+    </ul>
+    <p class="note">Checked 10 October 2026. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
