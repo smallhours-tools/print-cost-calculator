@@ -80,6 +80,9 @@
       <p>Material = weight &times; price per kg, plus a waste allowance. Electricity = average power &times; hours &times; tariff. Wear = printer price divided by its lifetime hours, plus maintenance per hour. Labor = your time &times; your rate. The suggested price is set so that after marketplace fees you keep your target margin of the selling price.</p>
       <p>Weight and time are read from the slicer's own metadata (Bambu Studio / OrcaSlicer 3MF and G-code, PrusaSlicer, Cura). Multiple filaments are summed. If a file has no weight, it is estimated from filament length and the result says so.</p>
     </section>
+    <section><h2>Guides</h2>
+      <ul><li><a href="./guides/electricity-cost/">How much electricity does a 3D print use?</a> Measured watts per printer and what an hour of printing costs.</li></ul>
+    </section>
     <section><h2>FAQ</h2>
       <details><summary>Is my file uploaded anywhere?</summary><p>No. The file is read by JavaScript in your browser and never sent over the network. There is no backend. We count page views with Cloudflare Web Analytics, which uses no cookies and no fingerprinting, and your files are never part of that.</p></details>
       <details><summary>Which files work?</summary><p>Sliced files only: G-code from PrusaSlicer (including binary .bgcode), OrcaSlicer, Bambu Studio and Cura, sliced .3mf files from Bambu Studio / OrcaSlicer (slice, then save the project or export the plate sliced file), and UltiMaker .ufp packages. Plain 3D models and unsliced project files have no print time or filament use yet, so slice them first. If yours is not recognised, enter weight and time by hand.</p></details>
