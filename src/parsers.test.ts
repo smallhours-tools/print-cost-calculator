@@ -4,7 +4,8 @@ import { parseFile } from './parsers/index';
 import { parseGcodeText } from './parsers/gcode';
 import { parseDuration } from './parsers/time';
 
-function makeZip(files: Record<string, string>, stored = false): Uint8Array {
+/** Builds a zip; zip64 mimics OrcaSlicer's writer (sizes/offsets in a zip64 extra field, zip64 end record). */
+function makeZip(files: Record<string, string>, stored = false, zip64 = false): Uint8Array {
   const parts: Buffer[] = [];
   const central: Buffer[] = [];
   let offset = 0;
@@ -25,11 +26,20 @@ function makeZip(files: Record<string, string>, stored = false): Uint8Array {
     ch.writeUInt16LE(20, 4);
     ch.writeUInt16LE(20, 6);
     ch.writeUInt16LE(stored ? 0 : 8, 10);
-    ch.writeUInt32LE(data.length, 20);
-    ch.writeUInt32LE(raw.length, 24);
+    ch.writeUInt32LE(zip64 ? 0xffffffff : data.length, 20);
+    ch.writeUInt32LE(zip64 ? 0xffffffff : raw.length, 24);
     ch.writeUInt16LE(nb.length, 28);
-    ch.writeUInt32LE(offset, 42);
-    central.push(ch, nb);
+    ch.writeUInt32LE(zip64 ? 0xffffffff : offset, 42);
+    const extra = Buffer.alloc(zip64 ? 28 : 0);
+    if (zip64) {
+      ch.writeUInt16LE(28, 30);
+      extra.writeUInt16LE(1, 0);
+      extra.writeUInt16LE(24, 2);
+      extra.writeBigUInt64LE(BigInt(raw.length), 4);
+      extra.writeBigUInt64LE(BigInt(data.length), 12);
+      extra.writeBigUInt64LE(BigInt(offset), 20);
+    }
+    central.push(ch, nb, extra);
     offset += 30 + nb.length + data.length;
   }
   const cd = Buffer.concat(central);
@@ -39,7 +49,23 @@ function makeZip(files: Record<string, string>, stored = false): Uint8Array {
   end.writeUInt16LE(Object.keys(files).length, 10);
   end.writeUInt32LE(cd.length, 12);
   end.writeUInt32LE(offset, 16);
-  return new Uint8Array(Buffer.concat([...parts, cd, end]));
+  if (!zip64) return new Uint8Array(Buffer.concat([...parts, cd, end]));
+  const n = BigInt(Object.keys(files).length);
+  const z = Buffer.alloc(56);
+  z.writeUInt32LE(0x06064b50, 0);
+  z.writeBigUInt64LE(44n, 4);
+  z.writeBigUInt64LE(n, 24);
+  z.writeBigUInt64LE(n, 32);
+  z.writeBigUInt64LE(BigInt(cd.length), 40);
+  z.writeBigUInt64LE(BigInt(offset), 48);
+  const loc = Buffer.alloc(20);
+  loc.writeUInt32LE(0x07064b50, 0);
+  loc.writeBigUInt64LE(BigInt(offset + cd.length), 8);
+  loc.writeUInt32LE(1, 16);
+  end.writeUInt16LE(0xffff, 8);
+  end.writeUInt16LE(0xffff, 10);
+  end.writeUInt32LE(0xffffffff, 16);
+  return new Uint8Array(Buffer.concat([...parts, cd, z, loc, end]));
 }
 
 describe('parseDuration', () => {
@@ -111,6 +137,11 @@ describe('3mf', () => {
     expect(r.totalWeightG).toBe(149.85);
     expect(r.warnings.join(' ')).toMatch(/2 sliced plates/);
   });
+  it('reads zip64 archives (OrcaSlicer writes these)', async () => {
+    const r = await parseFile(makeZip({ '3D/3dmodel.model': '<model/>', 'Metadata/slice_info.config': sliceInfo }, false, true));
+    expect(r.totalWeightG).toBe(20.5);
+    await expect(parseFile(makeZip({ '3D/3dmodel.model': '<model/>' }, true, true))).rejects.toThrow(/3D model/);
+  });
   it('reads stored entries', async () => {
     const r = await parseFile(makeZip({ 'Metadata/slice_info.config': sliceInfo }, true));
     expect(r.totalWeightG).toBe(20.5);
@@ -126,8 +157,32 @@ describe('3mf', () => {
     expect(r.printTimeSeconds).toBe(600);
     expect(r.totalWeightG).toBe(1.24);
   });
-  it('errors clearly on an unsliced 3MF', async () => {
-    await expect(parseFile(makeZip({ '3D/3dmodel.model': '<model/>' }))).rejects.toThrow(/no print metadata/);
+  it('explains a plain model 3MF', async () => {
+    // Entry layout of real plain models: 3MF Consortium core samples, OrcaSlicer calib/filament_flow, PrusaSlicer test_3mf.
+    await expect(parseFile(makeZip({ '3D/3dmodel.model': '<model/>' }))).rejects.toThrow(/3D model, not a sliced file/);
+    await expect(parseFile(makeZip({ '3D/3dmodel.model': '<model/>', 'Metadata/thumbnail.png': 'x' }))).rejects.toThrow(/3D model/);
+  });
+  it('explains an unsliced Bambu Studio / OrcaSlicer project', async () => {
+    const unsliced = `<config><plate><metadata key="index" value="1"/></plate></config>`;
+    for (const files of <Record<string, string>[]>[
+      { '3D/3dmodel.model': '<model/>', 'Metadata/project_settings.config': '{}', 'Metadata/model_settings.config': '<config/>' },
+      { '3D/3dmodel.model': '<model/>', 'Metadata/slice_info.config': unsliced },
+    ]) {
+      await expect(parseFile(makeZip(files))).rejects.toThrow(/hasn't been sliced.*Export plate sliced file/);
+    }
+  });
+  it('explains a PrusaSlicer project', async () => {
+    // Entry layout of real tests/data/seam_test_object.3mf from PrusaSlicer.
+    const files = { '3D/3dmodel.model': '<model/>', 'Metadata/Slic3r_PE.config': '; x', 'Metadata/Slic3r_PE_model.config': '<config/>' };
+    await expect(parseFile(makeZip(files))).rejects.toThrow(/PrusaSlicer project.*\.bgcode/);
+  });
+  it('explains a Cura project', async () => {
+    const files = { '3D/3dmodel.model': '<model/>', 'Cura/creality_ender3.def.cfg': '[general]' };
+    await expect(parseFile(makeZip(files))).rejects.toThrow(/Cura project/);
+  });
+  it('still parses a project saved after slicing', async () => {
+    const r = await parseFile(makeZip({ 'Metadata/project_settings.config': '{}', 'Metadata/slice_info.config': sliceInfo }));
+    expect(r.totalWeightG).toBe(20.5);
   });
   it('rejects corrupt zips', async () => {
     await expect(parseFile(new Uint8Array([0x50, 0x4b, 1, 2, 3, 4]))).rejects.toThrow();

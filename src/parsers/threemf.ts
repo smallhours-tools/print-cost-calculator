@@ -61,5 +61,24 @@ export async function parse3mf(bytes: Uint8Array): Promise<ParsedFile> {
     const r = parseGcodeText(dec.decode(await gcode.read()));
     return r.slicer === 'unknown' ? { ...r, slicer: 'bambu' } : r;
   }
-  throw new ParseError('This 3MF has no print metadata. Export a sliced 3MF (or G-code) from your slicer, or enter values manually.');
+  throw new ParseError(unslicedMessage(entries.map((e) => e.name)));
+}
+
+/**
+ * Explain why a 3MF without print results can't be priced, based on which slicer wrote it.
+ * Full sentences: the UI shows them as-is, followed by the manual-entry hint.
+ * Bambu/Orca are checked first: their exports also carry 3D/3dmodel.model.
+ */
+export function unslicedMessage(names: string[]): string {
+  const has = (n: string) => names.includes(n);
+  if (has('Metadata/project_settings.config') || has('Metadata/model_settings.config') || has('Metadata/slice_info.config'))
+    return (
+      "This Bambu Studio / OrcaSlicer project hasn't been sliced, so it has no print time or filament use yet. " +
+      'Slice it and save the project, or use File > Export > Export plate sliced file, then drop that in.'
+    );
+  if (has('Metadata/Slic3r_PE.config') || has('Metadata/Slic3r_PE_model.config'))
+    return "PrusaSlicer project files don't store print results. Slice it, export G-code (.gcode or .bgcode) and drop that in.";
+  if (names.some((n) => n.startsWith('Cura/')))
+    return "Cura project files don't store print results. Slice it, save the G-code (or a .ufp) and drop that in.";
+  return 'This is a 3D model, not a sliced file. Open it in your slicer, slice it, and drop in the exported G-code or sliced 3MF.';
 }
