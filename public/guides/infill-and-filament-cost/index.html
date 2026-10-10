@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Does infill change 3D print cost? How much filament infill really uses</title>
+  <meta name="description" content="How much of the filament in a 3D print is actually infill, measured in 7 real PrusaSlicer files (13 to 38% at 15% infill), why walls and top and bottom layers cost more, and what lowering infill really saves.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/infill-and-filament-cost/">
+  <meta property="og:title" content="Does infill change the cost of a 3D print?">
+  <meta property="og:description" content="At 15% infill, sparse infill was only 13 to 38% of the filament in 7 real sliced files. Walls and solid layers cost more.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/infill-and-filament-cost/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Does infill change the cost of a 3D print?", "description": "How much of the filament in a 3D print is actually infill, measured in 7 real PrusaSlicer files (13 to 38% at 15% infill), why walls and top and bottom layers cost more, and what lowering infill really saves.", "url": "https://smallhourstools.com/print-cost-calculator/guides/infill-and-filament-cost/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/infill-and-filament-cost/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    pre{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.85rem} pre:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › <a href="../">Guides</a></header>
+  <main>
+    <h1>Does infill change the cost of a 3D print?</h1>
+    <p>Lowering infill is the usual tip for saving filament. It helps, but less than most people expect: in real sliced files, the sparse infill is a minority of the filament. Most of it goes into the walls and the solid top and bottom layers, which don't change when you move the infill slider.</p>
+
+    <h2>Where the filament goes in 7 real files</h2>
+    <p>We added up the extrusion in each section of seven G-code files sliced with PrusaSlicer (the slicer labels every section, such as <code>;TYPE:Internal infill</code>). Each file's sum matches its own <code>filament used [mm]</code> line. All use 2 perimeters, 5 top and 4 bottom solid layers.</p>
+    <section class="scroll" aria-label="Share of filament by feature in 7 real files" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">File</th><th scope="col">Infill setting</th><th scope="col">Weight</th><th scope="col">Walls</th><th scope="col">Solid layers</th><th scope="col">Sparse infill</th><th scope="col">Other</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">3DBenchy</th><td>15%</td><td>12.08 g</td><td>56%</td><td>30%</td><td>14%</td><td>0%</td></tr>
+          <tr><th scope="row">Calicat</th><td>15%</td><td>6.64 g</td><td>48%</td><td>20%</td><td>32%</td><td>0%</td></tr>
+          <tr><th scope="row">PrusaSlicer test print</th><td>15%</td><td>10.18 g</td><td>56%</td><td>30%</td><td>13%</td><td>1%</td></tr>
+          <tr><th scope="row">PrusaSlicer sequential test</th><td>15%</td><td>9.70 g</td><td>35%</td><td>22%</td><td>38%</td><td>4%</td></tr>
+          <tr><th scope="row">Screw</th><td>5%</td><td>5.09 g</td><td>39%</td><td>50%</td><td>10%</td><td>2%</td></tr>
+          <tr><th scope="row">Plant sign</th><td>5%</td><td>4.91 g</td><td>28%</td><td>69%</td><td>0%</td><td>3%</td></tr>
+          <tr><th scope="row">Vase (spiral mode)</th><td>0%</td><td>8.94 g</td><td>73%</td><td>26%</td><td>0%</td><td>1%</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">Walls are perimeters (inner, outer and overhang). Solid layers are the solid top, bottom and bridge infill. Other is the skirt and the start purge line. Shares are of extruded length, which is the same as weight for a single filament.</p>
+    <p>At the common 15% setting, sparse infill was between <strong>13% and 38%</strong> of the filament. The two 5% files show the other side: the flat plant sign is thin enough that it has no sparse infill at all, only solid layers, so the infill setting didn't matter.</p>
+
+    <h2>What lowering infill saves</h2>
+    <p>Halving the infill density roughly halves the sparse-infill line and leaves the rest alone. On the files above at 15%, going to about 7% would save roughly <strong>7 to 19%</strong> of the filament, not half.</p>
+    <p>For the Benchy, that is about 0.8 g of its 12.08 g. At 20 per kg (the calculator's default filament price) it saves about 0.02, a couple of cents. Even printing it with no infill at all would save at most 1.7 g.</p>
+    <p>Where infill does matter: chunky parts with a lot of inside volume for their surface (two solid boxes in PrusaSlicer's sequential test had the most at 38%, the calicat figure 32%), and high infill settings, since the infill share grows with the density. If you print at 40% or more, lowering it saves more.</p>
+
+    <h2>What changes the cost more</h2>
+    <ul>
+      <li><strong>Walls.</strong> Every extra perimeter adds a full loop on every layer. Walls were the biggest share in 4 of the 7 files.</li>
+      <li><strong>Top and bottom layers.</strong> Flat, wide parts are mostly solid layers. Fewer top layers saves filament but can leave gaps on top.</li>
+      <li><strong>Size.</strong> Filament grows with volume, so scaling a model up by 20% uses about 1.7 times the filament (1.2³), whatever the infill.</li>
+      <li><strong>Waste that isn't in the model.</strong> Supports, brims and, in <a href="../multicolor-purge-waste/">multicolor prints, the wipe tower</a> can outweigh all the infill.</li>
+    </ul>
+    <p>To see the numbers for your own print, slice it twice with different infill and compare the slicer's filament totals; the <a href="../slicer-print-time-and-filament/">slicer metadata guide</a> shows where they are. Then turn grams into money with <a href="../filament-cost-per-gram/">filament cost per gram</a>.</p>
+
+    <div class="cta">
+      <p><strong>Price your own print.</strong> Drop the sliced file into the <a href="../../">free 3D print cost calculator</a>. It reads the slicer's filament total, so whatever infill you chose is already counted. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li><code>3DBenchy.gcode</code>, <code>calicat.gcode</code>, <code>screw.gcode</code>, <code>plant-sign.gcode</code> and <code>vase.gcode</code> from <a href="https://github.com/xyz-tools/gcode-preview/tree/develop/demo/gcodes">gcode-preview demo files</a> (MIT; PrusaSlicer 2.7.4 and 2.9.2), read on 10 October 2026.</li>
+      <li><code>test.gcode</code> and <code>test_sequential.gcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a> (PrusaSlicer 2.9.0), read on 10 October 2026.</li>
+      <li>Per-feature totals were summed by the calculator's own open-source code (<a href="https://github.com/smallhours-tools/print-cost-calculator">src/parsers/features.ts</a>); the raw numbers are in its <code>docs/reference-data.md</code>. Everything else on this page is arithmetic on those figures.</li>
+    </ul>
+    <p class="note">Checked 10 October 2026. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

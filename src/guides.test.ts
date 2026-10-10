@@ -204,3 +204,39 @@ describe('multicolor purge waste guide', () => {
     expect(html).toContain(`not ${model.toFixed(2)} g`);
   });
 });
+
+describe('infill guide', () => {
+  // Written by an AI agent (Claude): the share table and the savings text recompute from the per-feature
+  // totals in docs/reference-data.md, and those totals add up to each file's stated length (hq t036).
+  const html = text('infill-and-filament-cost');
+  const ref = readFileSync('docs/reference-data.md', 'utf8').split('## Filament by feature')[1].split('\n')
+    .filter((l) => /^\| \S+\.gcode \|/.test(l))
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()))
+    .map(([file, infill, stated, ...rest]) => ({ file, infill, stated: +stated, parts: rest.slice(0, 4).map(Number), grams: +rest[4] }));
+  const share = (r: (typeof ref)[0], i: number) => r.parts[i] / r.parts.reduce((s, v) => s + v, 0);
+  it('reference totals match the stated lengths', () => {
+    expect(ref.length).toBe(7);
+    for (const r of ref) expect(Math.abs(r.parts.reduce((s, v) => s + v, 0) / r.stated - 1)).toBeLessThan(0.025);
+  });
+  it('table recomputes from the reference data', () => {
+    const t = rows(html).filter((x) => x[2]?.endsWith(' g') && x[1]?.endsWith('%'));
+    expect(t.map((x) => x.slice(1))).toEqual(ref.map((r) => [r.infill, `${r.grams.toFixed(2)} g`, ...[0, 1, 2, 3].map((i) => `${Math.round(share(r, i) * 100)}%`)]));
+  });
+  it('ranges and the Benchy example recompute', () => {
+    const s15 = ref.filter((r) => r.infill === '15%').map((r) => share(r, 2));
+    const [lo, hi] = [Math.min(...s15), Math.max(...s15)];
+    expect(html).toContain(`between <strong>${Math.round(lo * 100)}% and ${Math.round(hi * 100)}%</strong>`);
+    expect(html).toContain(`roughly <strong>${Math.round(lo * 50)} to ${Math.round(hi * 50)}%</strong>`);
+    expect(html).toContain(`(${Math.round(lo * 100)} to ${Math.round(hi * 100)}% at 15% infill)`);
+    const b = ref.find((r) => r.file === '3DBenchy.gcode')!;
+    const saved = (b.grams * share(b, 2)) / 2;
+    expect(html).toContain(`about ${saved.toFixed(1)} g of its ${b.grams.toFixed(2)} g`);
+    expect(html).toContain(`At ${DEFAULTS.filamentPricePerKg} per kg (the calculator's default filament price) it saves about ${((saved / 1000) * DEFAULTS.filamentPricePerKg).toFixed(2)}`);
+    expect(html).toContain(`at most ${(b.grams * share(b, 2)).toFixed(1)} g`);
+    const top = ref.filter((r) => r.infill === '15%').sort((a, c) => share(c, 2) - share(a, 2));
+    expect(top[0].file).toBe('test_sequential.gcode');
+    expect(html).toContain(`most at ${Math.round(share(top[0], 2) * 100)}%, the calicat figure ${Math.round(share(top[1], 2) * 100)}%`);
+    expect(ref.filter((r) => share(r, 0) === Math.max(...[0, 1, 2, 3].map((i) => share(r, i)))).length).toBe(4);
+    expect(html).toContain('biggest share in 4 of the 7 files');
+  });
+});
