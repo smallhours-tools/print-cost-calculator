@@ -5,6 +5,9 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 ## NEEDS_OWNER
 - None (Pages is live and private vulnerability reporting is enabled, both checked 2026-10-10).
 
+## Run 2026-10-10 (09:10 UTC, Opus)
+hq t015 (#36): third guide, public/guides/how-to-price-3d-prints/: the cost model step by step, divide-don't-add for margin and fees, a worked example on PrusaSlicer's test.bgcode (62.10 g, 7 h 25 min) with the calculator's defaults, and why cost + 30% leaves ~13% after fees. cost.test.ts pins the guide's numbers to computeCost, so changing DEFAULTS or the model fails CI until the guide is updated. No platform fee rates (Etsy guide waits for t011's local fee check). Axe clean light/dark, 320 px OK.
+
 ## Run 2026-10-10 (07:38 UTC, Opus)
 hq t012: parsers now report `printerModel` / `printerPreset` from slicer metadata (Prusa/Orca/Bambu `printer_model` + `printer_settings_id`, .bgcode printer block, Bambu/Orca 3MF Metadata/project_settings.config, Cura Griffin `TARGET_MACHINE.NAME`), cleaned to short printable labels. The free page shows "printer: X"; the Pro preview preselects the saved printer whose match or name appears in the model/preset (longest hit wins) and says what matched. Checked on 9 real files (docs/reference-data.md). Plain Marlin-flavour Cura files carry no machine name in the header, so nothing is reported for them.
 Then hq t013 (#32): src/printer-power.ts offers the maker's published PLA wattage (Bambu Lab wiki table, exact model names; Prusa MK-series 80 W) as a "Use it" note on the free page; never applied automatically. Then #33/#34: fuzzing 4,500 mutated real files found corrupt deflate escaping as a bare TypeError; inflate now throws ParseError, and a seeded fuzz test (3MF, zip64, .bgcode) runs in CI. Next: real files from Orca forks (Creality Print, ElegooSlicer, Anycubic, QIDI; hq t014, local session first).
