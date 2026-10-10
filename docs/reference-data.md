@@ -27,7 +27,18 @@ Values in the table are what the parser returned; each matched the file's own me
 | two_plates_h2c.gcode.3mf | same | Bambu Studio 02.08, 2 plates | 9295 | 149.85 |
 | warning_h2c.gcode.3mf | same | Bambu Studio 02.08 | 1037 | 4.21 |
 
-Still missing: a real OrcaSlicer G-code and a Cura file in the Marlin header style (`;TIME:` / `;Filament used:`).
+## More real files (checked 2026-10-10; found by a local session with GitHub code search)
+
+| File | Source | Slicer | Time (s) | Weight (g) |
+|---|---|---|---|---|
+| cubewithironing.gcode | [harpua555/OpenFilamentSensor tools/](https://github.com/harpua555/OpenFilamentSensor) | OrcaSlicer | 395 | 1.20 |
+| orcaslicer.gcode | [mjonuschat/acceleration-control GCode/](https://github.com/mjonuschat/acceleration-control) | OrcaSlicer (ABS) | 220 | 0.59 |
+| cube_10mm_petg.gcode | [tommasobbianchi/ShidaoSlicer validation/orca_gcode/](https://github.com/tommasobbianchi/ShidaoSlicer) | OrcaSlicer, `filament_density = 0` | 515 | 0.72 (est. from 0.58 cm³) |
+| SimpleCuraTest.gcode | [mriscoc/Ender3V2S1 slicer scripts/cura/](https://github.com/mriscoc/Ender3V2S1) | Cura, Marlin header | 420 | 0.98 (from length) |
+| xyzCalibration_cube.gcode | [YouMakeTech/klipper-ender3 demo/](https://github.com/YouMakeTech/klipper-ender3) | Cura, Marlin header | 870 | 3.23 (from length) |
+| AA8_cover_usb.gcode | [verlab/hero_common hero_resources/3d_printer/](https://github.com/verlab/hero_common) | Cura, Marlin header | 168 | 0.25 (from length) |
+
+cube_10mm_petg.gcode exposed a bug: its profile has no density, so the slicer wrote `total filament used [g] = 0.00` and we used to report 0 g. The parser now treats 0 g with filament used as missing, ignores densities <= 0, prefers `filament used [cm3]` x density, falls back to the material type's typical density (else PLA), and warns "Your slicer profile has no filament density, so weight is estimated." Note that the same file labels its filament `PLA` although the file name says PETG. We trust the label, giving 0.72 g; at PETG density it would be 0.74 g.
 
 ## Printer power (average while printing)
 

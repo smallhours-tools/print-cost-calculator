@@ -5,6 +5,8 @@ export interface FilamentUsage {
   type?: string;
   weightG?: number;
   lengthMm?: number;
+  /** Slicer-reported volume in cm3; used internally to estimate weight, then removed. */
+  volumeCm3?: number;
   /** True when weightG was derived from length (not read from the file). */
   weightEstimated?: boolean;
 }

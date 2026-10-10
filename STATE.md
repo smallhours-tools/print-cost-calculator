@@ -16,7 +16,7 @@ Done: Pro batch pricing + CSV export (PR #14) and printable quote renderer (PR #
 Done: issue forms + issue-intake workflow (PR #9, awaiting owner merge since it touches .github/); Pro profile store `src/pro/profiles.ts` (PR #10, not wired to UI). Next: Pro batch table, quote page, CSV (see hq playbooks/pro-addon-spec.md).
 
 ## Owner-session update: 2026-10-09 (evening, local session)
-Parsers checked against 16 real slicer files from public repos (docs/reference-data.md). Added .bgcode, Cura Griffin, .ufp; multi-plate 3MF now totals time and filament. Default power 100 W (sourced). Still wanted: a real OrcaSlicer G-code and a Marlin-style Cura file.
+Parsers checked against 16 real slicer files from public repos (docs/reference-data.md). Added .bgcode, Cura Griffin, .ufp; multi-plate 3MF now totals time and filament. Default power 100 W (sourced). Real OrcaSlicer and Marlin-style Cura files now checked too (2026-10-10, docs/reference-data.md); zero-density Orca bug fixed.
 
 ## Earlier run: 2026-10-09 (run 4)
 Done: FAQ JSON-LD (test keeps it in sync with visible FAQ), public/sitemap.xml. Not done: og:image (needs asset), home-page card stays 'in development' until owner publishes.
