@@ -190,3 +190,18 @@ test('free page offers the sourced power for the file\'s printer, only on click 
   await expect(page.locator('#power-hint')).toBeHidden();
   expect(errors).toEqual([]);
 });
+
+test('pricing guide links open the calculator with the example job (hq t016)', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('/guides/how-to-price-3d-prints/');
+  await page.getByRole('link', { name: 'Open this example in the calculator' }).click();
+  await expect(page.locator('#f-weightG')).toHaveValue('62.1');
+  await expect(page.locator('#f-hours')).toHaveValue('7');
+  await expect(page.locator('#f-mins')).toHaveValue('25');
+  // Same as the guide's table with the default settings.
+  await expect(page.locator('#price')).toHaveText('$ 8.31');
+  // Cost settings never come from the URL.
+  await page.goto('/#g=10&feePct=90');
+  await expect(page.locator('#f-feePct')).toHaveValue('6.5');
+  expect(errors).toEqual([]);
+});

@@ -1,5 +1,6 @@
 import { computeCost, DEFAULTS, type CostInputs } from './cost';
 import { parseFile } from './parsers/index';
+import { parseHashJob } from './hash';
 import { powerHint } from './printer-power';
 import { proPreviewEnabled } from './pro/gate';
 
@@ -122,6 +123,9 @@ function init() {
     try { localStorage.removeItem(STORE); localStorage.removeItem(STORE + '.cur'); } catch { /* ignore */ }
     location.reload();
   });
+  const job = parseHashJob(location.hash);
+  if (job.weightG !== undefined) input('weightG').value = String(job.weightG);
+  if (job.seconds !== undefined) setTime(job.seconds);
   render();
   if (proPreviewEnabled(location)) {
     import('./pro/batch-ui').then(({ mountBatch }) => mountBatch(
