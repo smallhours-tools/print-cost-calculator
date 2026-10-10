@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Multicolor 3D printing waste: how much filament the wipe tower and purging use</title>
+  <meta name="description" content="How much filament goes to the wipe tower and purging in multicolor 3D prints, read from a real 5-color PrusaSlicer file (70% of the filament), how to find the number in your own slicer output, and how to price it.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/guides/multicolor-purge-waste/">
+  <meta property="og:title" content="How much filament does multicolor printing waste?">
+  <meta property="og:description" content="In a real 5-color PrusaSlicer file, 70% of the filament goes to the wipe tower. How to find and price it.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/guides/multicolor-purge-waste/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "How much filament does multicolor printing waste?", "description": "How much filament goes to the wipe tower and purging in multicolor 3D prints, read from a real 5-color PrusaSlicer file (70% of the filament), how to find the number in your own slicer output, and how to price it.", "url": "https://smallhourstools.com/print-cost-calculator/guides/multicolor-purge-waste/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/multicolor-purge-waste/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:46rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.95rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd)} th{text-align:left;font-weight:500} td{text-align:right;white-space:nowrap}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    pre{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:.6rem;overflow-x:auto;font-size:.85rem} pre:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../../">3D Print Cost Calculator</a> › <a href="../">Guides</a></header>
+  <main>
+    <h1>How much filament does multicolor printing waste?</h1>
+    <p>Every time a multicolor printer switches filament, it has to push out the old color before the new one comes out clean. That purged filament goes into a wipe tower, a purge chute or the infill, and on small multicolor prints it can be <strong>most of the filament you buy</strong>. Here is a real example and how to check your own.</p>
+
+    <h2>A real example: 70% to the wipe tower</h2>
+    <p>The PrusaSlicer source repository includes a test print sliced for an Original Prusa MK3 with the 5-filament MMU2, in five colors of ABS, about 8 h 36 min long. Its G-code ends with these lines:</p>
+    <pre tabindex="0" aria-label="PrusaSlicer multi-material G-code footer lines">; filament used [g] = 6.80, 33.23, 19.64, 6.12, 2.88
+; total filament used [g] = 68.66
+; total filament used for wipe tower [g] = 47.82</pre>
+    <section class="scroll" aria-label="Where the filament goes in the 5-color example" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Part</th><th scope="col">Filament</th><th scope="col">Share</th><th scope="col">Cost at 26.99/kg</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Wipe tower</th><td>47.82 g</td><td>70%</td><td>1.29</td></tr>
+          <tr><th scope="row">Everything else (the model)</th><td>20.84 g</td><td>30%</td><td>0.56</td></tr>
+          <tr><th scope="row">Total</th><td>68.66 g</td><td>100%</td><td>1.85</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p class="note">26.99 per kg is the filament price set in the file's own profile; the slicer's <code>total filament cost</code> line says 1.85, matching the total. The per-filament figures add up to 68.67 g; the total line says 68.66 because of rounding.</p>
+    <p>For every gram that ends up in the model, this print spends 2.3 g on the wipe tower. The profile purges 140 mm³ of filament at every color change (its <code>wiping_volumes_matrix</code>), which is only about 0.15 g each time at ABS's 1.08 g/cm³, but a print with many color changes on many layers adds that up fast.</p>
+
+    <h2>Find the number for your own print</h2>
+    <ul>
+      <li><strong>PrusaSlicer and OrcaSlicer G-code:</strong> search the end of the file for <code>total filament used for wipe tower [g]</code>.</li>
+      <li><strong>Other slicers:</strong> compare the filament total of the multicolor slice with a single-color slice of the same model. The difference is the purge and tower cost.</li>
+    </ul>
+    <p>See <a href="../slicer-print-time-and-filament/">where slicers store print time and filament use</a> for the rest of each file's totals.</p>
+
+    <h2>Pricing it</h2>
+    <p>The slicer's filament total already <em>includes</em> the wipe tower, and the <a href="../../">calculator</a> reads that total from the file. So keep the calculator's waste percentage for what the slicer can't see, such as failed prints and trimmed supports, and don't add the tower a second time. If you enter weights by hand, use the slicer's total, not the model's weight: in the example above that is 68.66 g, not 20.84 g.</p>
+
+    <h2>Ways to waste less</h2>
+    <ul>
+      <li><strong>Print several parts in one job.</strong> The tower is built once per layer, however many objects share it, so the waste per part drops.</li>
+      <li><strong>Fewer color changes.</strong> Changing color at a few layer heights costs far fewer purges than changing on every layer.</li>
+      <li><strong>Purge into something useful.</strong> Slicers can flush into an object's infill or into a sacrificial object instead of the tower; check your slicer's multi-material settings.</li>
+      <li><strong>Tune purge volumes.</strong> Light-to-dark changes need less purging than dark-to-light. Lower the volumes only after test prints show clean colors.</li>
+    </ul>
+
+    <div class="cta">
+      <p><strong>Price your own multicolor print.</strong> Drop the sliced file into the <a href="../../">free 3D print cost calculator</a>. It reads the total filament, tower included, and prices it with your rates. Your file never leaves your browser.</p>
+    </div>
+
+    <h2>Sources</h2>
+    <ul>
+      <li><code>test_multimaterial.gcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a> (PrusaSlicer 2.9.0, printer model MK3MMU2, five Generic ABS @MMU profiles at 1.08 g/cm³ and 26.99 per kg, 140 mm³ wiping volumes), read on 10 October 2026.</li>
+      <li>Everything else on this page is arithmetic on those figures.</li>
+    </ul>
+    <p class="note">Checked 10 October 2026. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
