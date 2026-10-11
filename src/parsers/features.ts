@@ -106,6 +106,30 @@ export function featureLengthsFromBytes(bytes: Uint8Array, chunk = 4 << 20): Par
   return c.lengths();
 }
 
+/**
+ * Same again, but hands the main thread back between chunks (hq t046): a 50 MB file used to block the page
+ * for over 2 s. 1 MB chunks take roughly 40 ms each in Chromium.
+ */
+export async function featureLengthsFromBytesAsync(bytes: Uint8Array, chunk = 1 << 20): Promise<Partial<Record<FeatureGroup, number>>> {
+  const dec = new TextDecoder();
+  const c = new FeatureCounter();
+  for (let i = 0; i < bytes.length; i += chunk) {
+    c.push(dec.decode(bytes.subarray(i, i + chunk), { stream: i + chunk < bytes.length }));
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  return c.lengths();
+}
+
+/** Same, streamed from a File/Blob in 512 KB slices so the whole file is never in memory at once (hq t046). */
+export async function featureLengthsFromBlob(blob: Blob, chunk = 512 << 10): Promise<Partial<Record<FeatureGroup, number>>> {
+  const dec = new TextDecoder();
+  const c = new FeatureCounter();
+  for (let i = 0; i < blob.size; i += chunk) {
+    c.push(dec.decode(new Uint8Array(await blob.slice(i, i + chunk).arrayBuffer()), { stream: i + chunk < blob.size }));
+  }
+  return c.lengths();
+}
+
 const LABELS: Record<FeatureGroup, string> = {
   walls: 'walls', solid: 'solid layers', sparse: 'sparse infill', tower: 'wipe tower', support: 'supports', other: 'other',
 };
@@ -137,7 +161,7 @@ export async function featureLengthsFrom3mf(bytes: Uint8Array, maxBytes: number)
   if (!plates.length || plates.reduce((s, e) => s + e.size, 0) > maxBytes) return {};
   const out: Partial<Record<FeatureGroup, number>> = {};
   for (const p of plates) {
-    for (const [k, v] of Object.entries(featureLengthsFromBytes(await p.read())) as [FeatureGroup, number][]) out[k] = (out[k] ?? 0) + v;
+    for (const [k, v] of Object.entries(await featureLengthsFromBytesAsync(await p.read())) as [FeatureGroup, number][]) out[k] = (out[k] ?? 0) + v;
   }
   return out;
 }

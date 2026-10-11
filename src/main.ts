@@ -1,7 +1,7 @@
 import { computeCost, DEFAULTS, perHour, type CostInputs } from './cost';
-import { parseFile, type ParsedFile } from './parsers/index';
+import { GCODE_END_BYTES, MAX_FILE_BYTES, ParseError, TOO_LARGE, parseFile, type ParsedFile } from './parsers/index';
 import { isBgcode } from './parsers/bgcode';
-import { featureLengthsFrom3mf, featureLengthsFromBytes, featureSummary } from './parsers/features';
+import { featureLengthsFrom3mf, featureLengthsFromBlob, featureSummary } from './parsers/features';
 import { bgcodeFeatureLengths } from './parsers/bgcode-gcode';
 import { jobHash, parseHashJob } from './hash';
 import { powerHint } from './printer-power';
@@ -90,19 +90,45 @@ function showPowerHint(model?: string) {
 /** hq t039/t041/t040: per-feature split for single-filament G-code, .bgcode or sliced Bambu/Orca 3MF with feature comments; hidden otherwise. */
 const FEATURE_MAX_BYTES = 64 * 1024 * 1024;
 let featureRun = 0;
-async function showFeatureSplit(bytes: Uint8Array, parsed: ParsedFile) {
+async function showFeatureSplit(read: FileRead, parsed: ParsedFile) {
   const box = $('feature-split');
   box.hidden = true;
   const run = ++featureRun;
-  const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b;
-  if (bytes.length > FEATURE_MAX_BYTES || parsed.filaments.length !== 1 || !parsed.totalWeightG) return;
-  const lengths = isZip
+  if (read.file.size > FEATURE_MAX_BYTES || parsed.filaments.length !== 1 || !parsed.totalWeightG) return;
+  const { bytes } = read;
+  const lengths = read.kind === 'zip'
     ? await featureLengthsFrom3mf(bytes, FEATURE_MAX_BYTES)
-    : isBgcode(bytes) ? await bgcodeFeatureLengths(bytes) : featureLengthsFromBytes(bytes);
+    : read.kind === 'bgcode' ? await bgcodeFeatureLengths(bytes) : await featureLengthsFromBlob(read.file);
   const line = featureSummary(lengths, parsed.totalWeightG, parsed.filaments[0].lengthMm);
   if (!line || run !== featureRun) return; // nothing to show, or another file was dropped meanwhile
   $('feature-split-text').textContent = line;
   box.hidden = false;
+}
+
+/**
+ * hq t046: never read a big file in one go; one Blob.arrayBuffer() call blocks Chromium's main thread for
+ * about 0.4 s per 50 MB. Plain G-code keeps its totals near the start and end, so only GCODE_END_BYTES of
+ * each end are read, joined by a newline, and parseFile decodes exactly those two ends (any file size works).
+ * The walls/infill split then streams the file itself. 3MF and .bgcode need every byte, up to MAX_FILE_BYTES,
+ * read in 4 MB slices.
+ */
+interface FileRead { file: File; kind: 'zip' | 'bgcode' | 'gcode'; bytes: Uint8Array }
+async function readForParse(file: File): Promise<FileRead> {
+  const part = async (from: number, to: number) => new Uint8Array(await file.slice(from, to).arrayBuffer());
+  const magic = await part(0, 10);
+  const kind = magic[0] === 0x50 && magic[1] === 0x4b ? 'zip' : isBgcode(magic) ? 'bgcode' : 'gcode';
+  if (kind === 'gcode') {
+    if (file.size <= 2 * GCODE_END_BYTES) return { file, kind, bytes: await part(0, file.size) };
+    const bytes = new Uint8Array(2 * GCODE_END_BYTES + 1);
+    bytes.set(await part(0, GCODE_END_BYTES), 0);
+    bytes[GCODE_END_BYTES] = 0x0a;
+    bytes.set(await part(file.size - GCODE_END_BYTES, file.size), GCODE_END_BYTES + 1);
+    return { file, kind, bytes };
+  }
+  if (file.size > MAX_FILE_BYTES) throw new ParseError(TOO_LARGE);
+  const bytes = new Uint8Array(file.size);
+  for (let i = 0; i < file.size; i += 4 << 20) bytes.set(await part(i, Math.min(file.size, i + (4 << 20))), i);
+  return { file, kind, bytes };
 }
 
 async function handleFile(file: File) {
@@ -111,8 +137,8 @@ async function handleFile(file: File) {
   $('feature-split').hidden = true;
   featureRun++;
   try {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const parsed = await parseFile(bytes);
+    const read = await readForParse(file);
+    const parsed = await parseFile(read.bytes);
     input('weightG').value = parsed.totalWeightG !== undefined ? String(Math.round(parsed.totalWeightG * 10) / 10) : '';
     setTime(parsed.printTimeSeconds);
     const bits = [`Detected slicer: ${parsed.slicer}`, `${parsed.filaments.length} filament(s)`];
@@ -120,6 +146,7 @@ async function handleFile(file: File) {
     if (parsed.wipeTowerG !== undefined) bits.push(`${Math.round(parsed.wipeTowerG * 10) / 10} g of it is wipe tower (purge), already counted`);
     if (parsed.totalWeightG === undefined) bits.push('no weight found: enter it manually');
     if (parsed.printTimeSeconds === undefined) bits.push('no print time found: enter it manually');
+    if (file.size > FEATURE_MAX_BYTES && parsed.filaments.length === 1) bits.push(`over ${FEATURE_MAX_BYTES >> 20} MB, so the walls/infill split is skipped`);
     status.textContent = [...bits, ...parsed.warnings].join(' · ');
     render();
     // Pro preview listens for this to preselect saved materials. Only types and weights, never file text beyond them.
@@ -127,7 +154,7 @@ async function handleFile(file: File) {
     // ...and this to preselect a saved printer (model and preset are cleaned short labels).
     document.dispatchEvent(new CustomEvent('pcc:printer', { detail: { model: parsed.printerModel, preset: parsed.printerPreset } }));
     showPowerHint(parsed.printerModel);
-    showFeatureSplit(bytes, parsed).catch(() => { /* unreadable G-code blocks: the split just stays hidden */ });
+    showFeatureSplit(read, parsed).catch(() => { /* unreadable G-code blocks: the split just stays hidden */ });
   } catch (e) {
     $('power-hint').hidden = true;
     // Don't leave the previous file's numbers priced under a message that says to enter them.
