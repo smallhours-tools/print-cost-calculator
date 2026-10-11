@@ -8,6 +8,8 @@ const file = (name: string, buffer: Buffer) => ({ name, mimeType: 'text/plain', 
 
 function trackErrors(page: Page) {
   const errors: string[] = [];
+  // The page loads Cloudflare Web Analytics; offline in tests WebKit reports the blocked beacon as a page error (hq t045).
+  void page.route(/cloudflareinsights\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('dialog', (d) => { errors.push('dialog: ' + d.message()); void d.dismiss(); });
   return errors;
