@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { featureGroup, featureLengths, featureLengthsFromBytes, featureSummary } from './parsers/features';
+import { featureGroup, featureLengths, featureLengthsFromBlob, featureLengthsFromBytes, featureLengthsFromBytesAsync, featureSummary } from './parsers/features';
 
 // Written by an AI agent (Claude): per-feature extrusion sums (hq t036).
 describe('featureLengths', () => {
@@ -43,6 +43,13 @@ describe('streaming and summary', () => {
   it('gives the same result for any chunk size', () => {
     const bytes = new TextEncoder().encode(g);
     for (const n of [1, 2, 7, 1000]) expect(featureLengthsFromBytes(bytes, n)).toEqual({ walls: 5, sparse: 1, solid: 2 });
+  });
+  it('async and Blob streaming match, for any chunk size (hq t046)', async () => {
+    const bytes = new TextEncoder().encode(g);
+    for (const n of [1, 2, 7, 1000]) {
+      expect(await featureLengthsFromBytesAsync(bytes, n)).toEqual({ walls: 5, sparse: 1, solid: 2 });
+      expect(await featureLengthsFromBlob(new Blob([bytes]), n)).toEqual({ walls: 5, sparse: 1, solid: 2 });
+    }
   });
   it('reads Bambu-style FEATURE comments', () => expect(featureLengths('M83\n; FEATURE: Sparse infill\nG1 X1 E2\n; FEATURE: Prime tower\nG1 Y1 E1\n')).toEqual({ sparse: 2, tower: 1 }));
   it('summarises biggest first as grams and shares', () => {
