@@ -330,3 +330,14 @@ test('file pickers have no accept filter, so iPhones can pick .gcode/.bgcode/.uf
   await expect(page.locator('#file')).not.toHaveAttribute('accept', /./);
   await expect(page.locator('#batch-files')).not.toHaveAttribute('accept', /./);
 });
+
+test('accuracy page: linked from the FAQ, no sideways scroll on a 320px phone (hq t047)', async ({ page }) => {
+  await page.route(/cloudflareinsights\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+  await page.goto('/');
+  await page.locator('summary', { hasText: 'How accurate is it?' }).click();
+  await page.getByRole('link', { name: 'the test results page' }).click();
+  await expect(page.locator('h1')).toHaveText('How accurate is the 3D print cost calculator?');
+  await expect(page.locator('tbody tr').first()).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 800 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});

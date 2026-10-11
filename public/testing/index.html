@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How accurate is the 3D print cost calculator?</title>
+  <meta name="description" content="The calculator reads the slicer's own print time and filament weight. Checked against 47 files sliced in Bambu Studio, CuraEngine, OrcaSlicer and PrusaSlicer: the result for every file, what is not covered yet, and how to report a file it gets wrong.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://smallhourstools.com/print-cost-calculator/testing/">
+  <meta property="og:title" content="How accurate is the 3D print cost calculator?">
+  <meta property="og:description" content="The calculator reads the slicer's own print time and filament weight. Checked against 47 files sliced in Bambu Studio, CuraEngine, OrcaSlicer and PrusaSlicer: the result for every file, what is not covered yet, and how to report a file it gets wrong.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://smallhourstools.com/print-cost-calculator/testing/">
+  <meta property="og:site_name" content="Small Hours">
+  <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
+    @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
+    *{box-sizing:border-box}
+    body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+    main,footer,header{max-width:52rem;margin:0 auto;padding:1rem}
+    a{color:var(--acc)} a:focus-visible{outline:3px solid var(--acc);outline-offset:2px} h1{margin:.3em 0;line-height:1.2} h2{margin-top:1.8em}
+    .scroll{overflow-x:auto} .scroll:focus-visible{outline:3px solid var(--acc);outline-offset:2px} table{width:100%;border-collapse:collapse;font-size:.9rem} th,td{padding:.4rem;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top} th{font-weight:500} code{font-size:.85rem}
+    .cta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem}
+    .note{color:var(--mut);font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header><a href="../">3D Print Cost Calculator</a> › How accurate is it?</header>
+  <main>
+    <h1>How accurate is the 3D print cost calculator?</h1>
+    <p>The calculator reads the print time and filament weight your slicer wrote into the file, so it is as accurate as the slicer's own estimate. To check that it reads them correctly, we sliced our own test models in Bambu Studio, CuraEngine, OrcaSlicer and PrusaSlicer: 47 files. On all 41 files that state a weight, it reads the same print time (within 1 second) and weight (within 0.01 g) as the slicer. The 3 CuraEngine files state only filament length or volume, not weight: the calculator matches the print time on all 3, estimates the weight from PLA density and says so on the page. All 3 unsliced project files are refused with a message to slice them first.</p>
+    <p>A slicer's time is an estimate: firmware acceleration settings, pauses and filament changes can make the real print take longer or shorter. The <a href="../guides/slicer-print-time-and-filament/">slicer metadata guide</a> shows where each slicer writes these numbers.</p>
+
+    <h2>Every test file and result</h2>
+    <p>The files were sliced on 10 October 2026; the calculator's side is re-checked on every change. "Slicer says" is read straight from each file by a separate script, not by the calculator.</p>
+    <section class="scroll" aria-label="Test files: what the slicer says and what the calculator reads" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">File</th><th scope="col">Slicer</th><th scope="col">Slicer says</th><th scope="col">Calculator reads</th><th scope="col">Same?</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>B01_cube.gcode.3mf</code></th><td>Bambu Studio</td><td>8 min 47 s, 3.74 g</td><td>8 min 47 s, 3.74 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B01_cube.plate_1.gcode</code></th><td>Bambu Studio</td><td>8 min 47 s, 3.74 g</td><td>8 min 47 s, 3.74 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B02_petg.gcode.3mf</code></th><td>Bambu Studio</td><td>18 min 13 s, 3.68 g</td><td>18 min 13 s, 3.68 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B02_petg.plate_1.gcode</code></th><td>Bambu Studio</td><td>18 min 13 s, 3.68 g</td><td>18 min 13 s, 3.68 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B03_tiny.gcode.3mf</code></th><td>Bambu Studio</td><td>1 min 39 s, 0.15 g</td><td>1 min 39 s, 0.15 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B03_tiny.plate_1.gcode</code></th><td>Bambu Studio</td><td>1 min 39 s, 0.15 g</td><td>1 min 39 s, 0.15 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B04_supports.gcode.3mf</code></th><td>Bambu Studio</td><td>17 min 51 s, 7.26 g</td><td>17 min 51 s, 7.26 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B04_supports.plate_1.gcode</code></th><td>Bambu Studio</td><td>17 min 51 s, 7.26 g</td><td>17 min 51 s, 7.26 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B05_vase.gcode.3mf</code></th><td>Bambu Studio</td><td>30 min 4 s, 8.67 g</td><td>30 min 4 s, 8.67 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B05_vase.plate_1.gcode</code></th><td>Bambu Studio</td><td>30 min 4 s, 8.67 g</td><td>30 min 4 s, 8.67 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B06_long.gcode.3mf</code></th><td>Bambu Studio</td><td>21 h 31 min 59 s, 1666.63 g</td><td>21 h 31 min 59 s, 1666.63 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B06_long.plate_1.gcode</code></th><td>Bambu Studio</td><td>21 h 31 min 59 s, 1666.63 g</td><td>not checked automatically (over 3 MB, not in the repository)</td><td>–</td></tr>
+          <tr><th scope="row"><code>B07_project_unsliced.3mf</code></th><td>Bambu Studio</td><td>unsliced project</td><td>refused: “slice it first”</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B08_ams_pla_petg.gcode.3mf</code></th><td>Bambu Studio</td><td>1 h 38 min 47 s, 28.33 g</td><td>1 h 38 min 47 s, 28.34 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B08_ams_pla_petg.plate_1.gcode</code></th><td>Bambu Studio</td><td>1 h 38 min 47 s, 28.34 g</td><td>1 h 38 min 47 s, 28.34 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B09_two_plates.gcode.3mf</code></th><td>Bambu Studio</td><td>24 min 13 s, 6.96 g</td><td>24 min 13 s, 6.96 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B09_two_plates.plate_1.gcode</code></th><td>Bambu Studio</td><td>15 min 7 s, 3.24 g</td><td>15 min 7 s, 3.24 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>B09_two_plates.plate_2.gcode</code></th><td>Bambu Studio</td><td>9 min 6 s, 3.72 g</td><td>9 min 6 s, 3.72 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>C01_ender3_cube.gcode</code></th><td>CuraEngine</td><td>29 min 20 s, 1,363 mm of filament</td><td>29 min 20 s, 4.07 g (estimated)</td><td>yes</td></tr>
+          <tr><th scope="row"><code>C02_s5_cube.gcode</code></th><td>CuraEngine</td><td>31 min 11 s, 3,444 mm³ of filament</td><td>31 min 11 s, 4.27 g (estimated)</td><td>yes</td></tr>
+          <tr><th scope="row"><code>C03_s5_dual.gcode</code></th><td>CuraEngine</td><td>1 h 10 min 41 s, 4,045 + 2,379 mm³ of filament</td><td>1 h 10 min 41 s, 7.97 g (estimated)</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O01_cube.gcode.3mf</code></th><td>OrcaSlicer</td><td>17 min 10 s, 3.62 g</td><td>17 min 10 s, 3.62 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O01_cube.plate_1.gcode</code></th><td>OrcaSlicer</td><td>17 min 10 s, 3.62 g</td><td>17 min 10 s, 3.62 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O02_petg.gcode.3mf</code></th><td>OrcaSlicer</td><td>23 min 30 s, 3.60 g</td><td>23 min 30 s, 3.60 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O02_petg.plate_1.gcode</code></th><td>OrcaSlicer</td><td>23 min 30 s, 3.60 g</td><td>23 min 30 s, 3.60 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O03_tiny.gcode.3mf</code></th><td>OrcaSlicer</td><td>3 min 38 s, 0.16 g</td><td>3 min 38 s, 0.16 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O03_tiny.plate_1.gcode</code></th><td>OrcaSlicer</td><td>3 min 38 s, 0.16 g</td><td>3 min 38 s, 0.16 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O04_supports.gcode.3mf</code></th><td>OrcaSlicer</td><td>28 min 11 s, 7.42 g</td><td>28 min 11 s, 7.42 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O04_supports.plate_1.gcode</code></th><td>OrcaSlicer</td><td>28 min 11 s, 7.42 g</td><td>28 min 11 s, 7.42 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O05_vase.gcode.3mf</code></th><td>OrcaSlicer</td><td>58 min 34 s, 8.87 g</td><td>58 min 34 s, 8.87 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O05_vase.plate_1.gcode</code></th><td>OrcaSlicer</td><td>58 min 34 s, 8.87 g</td><td>58 min 34 s, 8.87 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O06_long.gcode.3mf</code></th><td>OrcaSlicer</td><td>22 h 28 min 25 s, 1645.88 g</td><td>22 h 28 min 25 s, 1645.88 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O06_long.plate_1.gcode</code></th><td>OrcaSlicer</td><td>22 h 28 min 25 s, 1645.88 g</td><td>not checked automatically (over 3 MB, not in the repository)</td><td>–</td></tr>
+          <tr><th scope="row"><code>O07_project_unsliced.3mf</code></th><td>OrcaSlicer</td><td>unsliced project</td><td>refused: “slice it first”</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O08_two_pla.gcode.3mf</code></th><td>OrcaSlicer</td><td>1 h 57 min 1 s, 7.08 g</td><td>1 h 57 min 1 s, 7.08 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O08_two_pla.plate_1.gcode</code></th><td>OrcaSlicer</td><td>1 h 57 min 1 s, 7.08 g</td><td>1 h 57 min 1 s, 7.08 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O09_two_plates.gcode.3mf</code></th><td>OrcaSlicer</td><td>37 min 25 s, 6.73 g</td><td>37 min 25 s, 6.73 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O09_two_plates.plate_1.gcode</code></th><td>OrcaSlicer</td><td>20 min 15 s, 3.11 g</td><td>20 min 15 s, 3.11 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>O09_two_plates.plate_2.gcode</code></th><td>OrcaSlicer</td><td>17 min 10 s, 3.62 g</td><td>17 min 10 s, 3.62 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P01_cube_bgcode.bgcode</code></th><td>PrusaSlicer</td><td>15 min 34 s, 3.78 g</td><td>15 min 34 s, 3.78 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P02_cube_gcode.gcode</code></th><td>PrusaSlicer</td><td>15 min 34 s, 3.78 g</td><td>15 min 34 s, 3.78 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P03_cube_petg.gcode</code></th><td>PrusaSlicer</td><td>17 min 12 s, 3.87 g</td><td>17 min 12 s, 3.87 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P04_tiny.gcode</code></th><td>PrusaSlicer</td><td>1 min 40 s, 0.19 g</td><td>1 min 40 s, 0.19 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P05_supports.gcode</code></th><td>PrusaSlicer</td><td>26 min 53 s, 7.02 g</td><td>26 min 53 s, 7.02 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P06_vase.gcode</code></th><td>PrusaSlicer</td><td>57 min 2 s, 9.65 g</td><td>57 min 2 s, 9.65 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P07_long.gcode</code></th><td>PrusaSlicer</td><td>27 h 52 min 35 s, 1673.52 g</td><td>not checked automatically (over 3 MB, not in the repository)</td><td>–</td></tr>
+          <tr><th scope="row"><code>P08_bgcode_as_gcode.gcode</code></th><td>PrusaSlicer</td><td>15 min 34 s, 3.78 g</td><td>15 min 34 s, 3.78 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P09_project_3mf.3mf</code></th><td>PrusaSlicer</td><td>unsliced project</td><td>refused: “slice it first”</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P10_xl2t_pla_petg.gcode</code></th><td>PrusaSlicer</td><td>20 min 19 s, 8.29 g</td><td>20 min 19 s, 8.28 g</td><td>yes</td></tr>
+          <tr><th scope="row"><code>P11_xl2t_pla_petg_bgcode.bgcode</code></th><td>PrusaSlicer</td><td>20 min 19 s, 8.29 g</td><td>20 min 19 s, 8.28 g</td><td>yes</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h2>Slicers and settings</h2>
+    <ul>
+      <li><strong>PrusaSlicer</strong> 2.9.6 (MK4S, Prusament PLA/PETG; XL 2T Input Shaper, Prusament PLA + PETG)</li>
+      <li><strong>Bambu Studio</strong> 02.08.02.61 (P1S, Bambu PLA Basic / PETG HF; P1S + AMS PLA + PETG)</li>
+      <li><strong>OrcaSlicer</strong> 2.4.2 (Creality K1C, Creality Generic PLA/PETG; two PLA colours)</li>
+      <li><strong>CuraEngine</strong> 5.13.0 standalone (Creality Ender-3, UltiMaker S5; definitions only, see README)</li>
+    </ul>
+    <p>The models are simple on purpose: a cube in PLA and PETG, a tiny cube, a part that needs supports, a vase-mode cylinder, a 21 to 28 hour slab, prints with two filaments and projects with two plates. The CuraEngine files come from Cura's slicing engine run on its own, so their numbers can differ from what the Cura app would give for the same model.</p>
+
+    <h2>Also checked: files other people published</h2>
+    <p>21 sliced files from public projects (PrusaSlicer's own test data, Cura, OrcaSlicer and Bambu Studio examples) were read and compared with the totals written in them, in October 2026. They are listed with their sources in <a href="https://github.com/smallhours-tools/print-cost-calculator/blob/main/docs/reference-data.md">reference-data.md</a>; their licences don't let us copy them into the repository, so they aren't re-checked on every change.</p>
+
+    <h2>Not covered yet</h2>
+    <ul>
+      <li>Files exported from the Cura app itself (only Cura's engine so far).</li>
+      <li>Slicers based on OrcaSlicer, such as Creality Print, ElegooSlicer, Anycubic Slicer Next, QIDI Studio and Snapmaker Orca. Their files usually look like OrcaSlicer's, but we haven't tested them.</li>
+      <li>Other slicers, such as Simplify3D, IdeaMaker and Kiri:Moto.</li>
+      <li>How close a slicer's time estimate is to the real print on your printer.</li>
+    </ul>
+
+    <div class="cta">
+      <p><strong>Found a file it reads wrong?</strong> <a href="https://github.com/smallhours-tools/print-cost-calculator/issues/new?template=bug.yml">Open a bug report</a> and say which slicer and file type it was. Or enter the weight and time by hand in the <a href="../">calculator</a>; your file never leaves your browser either way.</p>
+    </div>
+
+    <h2>Tests that run on every change</h2>
+    <p>261 unit tests, including 900 deliberately corrupted copies of sample files that must give a clear error instead of a crash, and browser tests on the built page: 42 in Chromium and 42 in Pixel 7 emulation. The large-file timings below are from one measurement; the 50 MB case runs on every change and fails if the page stops responding for more than 200 ms.</p>
+    <section class="scroll" aria-label="Large files: how fast the numbers appear and how long the page stops responding" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">File size</th><th scope="col">Numbers shown after</th><th scope="col">Walls/infill split</th><th scope="col">Longest pause</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">50 MB</th><td>0.1 s</td><td>shown after 2.1 s</td><td>27 ms</td></tr>
+          <tr><th scope="row">200 MB</th><td>0.2 s</td><td>skipped (over 64 MB)</td><td>29 ms</td></tr>
+          <tr><th scope="row">500 MB</th><td>0.2 s</td><td>skipped (over 64 MB)</td><td>35 ms</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <p>The test files, the expected values and the tests are in the <a href="https://github.com/smallhours-tools/print-cost-calculator/tree/main/test-corpus/slicer-matrix">public repository</a>.</p>
+    <p class="note">Generated from the test data. Written by an AI agent (Claude).</p>
+  </main>
+  <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
+  <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
