@@ -41,7 +41,7 @@ Values in the table are what the parser returned; each matched the file's own me
 cube_10mm_petg.gcode exposed a bug: its profile has no density, so the slicer wrote `total filament used [g] = 0.00` and we used to report 0 g. The parser now treats 0 g with filament used as missing, ignores densities <= 0, prefers `filament used [cm3]` x density, falls back to the material type's typical density (else PLA), and warns "Your slicer profile has no filament density, so weight is estimated." Note that the same file labels its filament `PLA` although the file name says PETG. We trust the label, giving 0.72 g; at PETG density it would be 0.74 g.
 
 ## Our own slicer matrix (2026-10-10, in CI since hq t044)
-`test-corpus/slicer-matrix/` holds our own test models sliced by real PrusaSlicer 2.9.6, Bambu Studio 02.08 and OrcaSlicer 2.4.2 installs (see its README): cube in PLA and PETG, a tiny cube, supports, vase mode, a 21-28 h slab at 100 % infill, unsliced project 3MFs, and for PrusaSlicer .bgcode (also saved under a .gcode name). `manifest.json` records what each slicer stated about its own output. `src/corpus.test.ts` checks every committed file in CI: weight within 0.01 g and time within 1 s of the slicer's numbers, the expected slicer label, and the exact rejection message for project files. All 32 committed files pass; three files over 3 MB (plain G-code of the slabs) are listed but not committed. Not covered yet: multi-material, multi-plate, Cura, Orca forks.
+`test-corpus/slicer-matrix/` holds our own test models sliced by real PrusaSlicer 2.9.6, Bambu Studio 02.08 and OrcaSlicer 2.4.2 installs (see its README): cube in PLA and PETG, a tiny cube, supports, vase mode, a 21-28 h slab at 100 % infill, unsliced project 3MFs, and for PrusaSlicer .bgcode (also saved under a .gcode name). `manifest.json` records what each slicer stated about its own output. `src/corpus.test.ts` checks every committed file in CI: weight within 0.01 g and time within 1 s of the slicer's numbers, the expected slicer label, and the exact rejection message for project files. Round 2 (hq t048) added multi-material, multi-plate and CuraEngine cases: 47 committed files, all pass (2026-10-11); three files over 3 MB (plain G-code of the slabs) are listed but not committed. Not covered yet: Cura app exports, Orca forks. The public page /print-cost-calculator/testing/ is generated from this corpus (hq t047).
 
 OrcaSlicer writes Bambu Studio's 3MF layout, down to `Application: BambuStudio-…` in 3D/3dmodel.model, so its sliced 3MFs used to be labelled `bambu`. Its slice_info.config carries an `OrcaSlicer-Version` header item, which now sets the label to `orca`.
 
@@ -117,3 +117,12 @@ From our own slicer-matrix files (test-corpus/slicer-matrix/): the same T-shape 
 | P05_supports.gcode | PrusaSlicer 2.9.6, snug, threshold 35°, 15% infill | 2354.86 | 1253.2 | 53% | 7.02 |
 | B04_supports.plate_1.gcode | Bambu Studio 02.08, normal(auto), 30°, 20% infill | 2394.25 | 1373.2 | 57% | 7.26 |
 | O04_supports.plate_1.gcode | OrcaSlicer 2.4.2, normal(auto), 30°, 15% infill | 2487.12 | 1443.0 | 58% | 7.42 |
+
+## Large files (measured 2026-10-11, hq t046)
+Headless Chromium on a cloud machine, `BIG_SIZES_MB=50,200,500 npx playwright test e2e/big-files.e2e.ts --project chromium`. G-code generated from our P05_supports.gcode (its moves repeated). "Longest block" is the longest time the page could not respond (gap in a 20 ms timer). CI repeats the 50 MB case on every change and fails above 200 ms.
+
+| Size | Numbers shown after | Walls/infill split | Longest block |
+|---|---|---|---|
+| 50 MB | 0.1 s | shown after 2.1 s | 27 ms |
+| 200 MB | 0.2 s | skipped (over 64 MB) | 29 ms |
+| 500 MB | 0.2 s | skipped (over 64 MB) | 35 ms |

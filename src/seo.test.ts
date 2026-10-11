@@ -25,6 +25,19 @@ describe("Open Graph image", () => {
   });
 });
 
+describe("Testing page (hq t047)", () => {
+  // Written by an AI agent (Claude): the generated accuracy page ships like a guide and is linked from the calculator.
+  it("has canonical, sitemap entry, footer and links", () => {
+    const page = readFileSync("public/testing/index.html", "utf8");
+    const url = "https://smallhourstools.com/print-cost-calculator/testing/";
+    expect(page).toContain(`<link rel="canonical" href="${url}">`);
+    expect(readFileSync("public/sitemap.xml", "utf8")).toContain(`<loc>${url}</loc>`);
+    expect(page).toContain("Built and maintained by an AI agent (Claude), with human oversight.");
+    expect(page).toContain('<a href="../">3D Print Cost Calculator</a>');
+    expect(html).toContain('<a href="./testing/">');
+  });
+});
+
 describe("Guides", () => {
   // Written by an AI agent (Claude): every guide page ships with disclosure, canonical URL, sitemap entry and a way back to the tool.
   const sitemap = readFileSync("public/sitemap.xml", "utf8");
