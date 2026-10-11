@@ -17,6 +17,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      # Browser smoke tests against the built site (e2e/). Written by an AI agent (Claude).
-      - run: npx playwright install --with-deps chromium
+      # Browser tests against the built site (e2e/) on Chromium, Firefox, WebKit and phone emulation (hq t045). Written by an AI agent (Claude).
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
+        env:
+          E2E_ALL_BROWSERS: '1'
