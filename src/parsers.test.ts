@@ -332,6 +332,19 @@ describe('printer model (hq t012; written by an AI agent, Claude)', () => {
   });
 });
 
+describe('files with nothing from a slicer (hq t045, written by an AI agent, Claude)', () => {
+  it('rejects empty files and non-sliced files with one plain sentence', async () => {
+    await expect(parseFile(new Uint8Array(0))).rejects.toThrow('This file is empty.');
+    const stl = new TextEncoder().encode('solid part\nfacet normal 0 0 1\nendsolid part\n');
+    await expect(parseFile(stl)).rejects.toThrow(/^This doesn't look like a sliced file/);
+    await expect(parseFile(stl)).rejects.toBeInstanceOf(ParseError);
+  });
+  it('still parses G-code that has only a time or only filament', async () => {
+    const onlyTime = new TextEncoder().encode('G1 X1\n; estimated printing time (normal mode) = 1h 2m\n');
+    expect((await parseFile(onlyTime)).printTimeSeconds).toBe(3720);
+  });
+});
+
 describe('fuzz: hostile bytes only ever give a result or a ParseError (written by an AI agent, Claude)', () => {
   let seed = 12345;
   const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);

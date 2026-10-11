@@ -19,6 +19,7 @@ export async function parseFile(bytes: Uint8Array): Promise<ParsedFile> {
 
 async function parseAny(bytes: Uint8Array): Promise<ParsedFile> {
   if (bytes.length > MAX_FILE_BYTES) throw new ParseError('File is too large');
+  if (bytes.length === 0) throw new ParseError('This file is empty.');
   if (bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b) return parse3mf(bytes);
   if (isBgcode(bytes)) return parseBgcode(bytes);
   // G-code: only the head and tail matter, so avoid decoding huge files in full.
@@ -28,5 +29,10 @@ async function parseAny(bytes: Uint8Array): Promise<ParsedFile> {
     bytes.length > 2 * CHUNK
       ? dec.decode(bytes.subarray(0, CHUNK)) + '\n' + dec.decode(bytes.subarray(bytes.length - CHUNK))
       : dec.decode(bytes);
-  return parseGcodeText(text);
+  const r = parseGcodeText(text);
+  // Nothing a slicer writes (an STL, a photo, a text file): one plain sentence beats a list of "not found" notes (hq t045).
+  if (r.slicer === 'unknown' && r.filaments.length === 0 && r.printTimeSeconds === undefined) {
+    throw new ParseError("This doesn't look like a sliced file: there is no print time or filament use in it. Slice the model first, then drop in the G-code, .bgcode or sliced 3MF.");
+  }
+  return r;
 }

@@ -212,9 +212,11 @@ test('pricing guide links open the calculator with the example job (hq t016)', a
   expect(errors).toEqual([]);
 });
 
-test('copy link to this job carries weight and time only (hq t022)', async ({ page, context }) => {
+test('copy link to this job carries weight and time only (hq t022)', async ({ page, context, browserName }) => {
   const errors = trackErrors(page);
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  // Only Chromium lets a test grant clipboard read; elsewhere the hash and status message are checked.
+  const canReadClipboard = browserName === 'chromium';
+  if (canReadClipboard) await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/');
   await page.getByRole('button', { name: 'Copy link to this job' }).click();
   await expect(page.locator('#copy-status')).toHaveText('Enter a weight or time first.');
@@ -225,9 +227,11 @@ test('copy link to this job carries weight and time only (hq t022)', async ({ pa
   await page.getByRole('button', { name: 'Copy link to this job' }).click();
   await expect(page.locator('#copy-status')).toContainText('weight and time only');
   expect(new URL(page.url()).hash).toBe('#g=12.5&s=5400');
-  const copied = await page.evaluate(() => navigator.clipboard.readText());
-  expect(copied).toContain('#g=12.5&s=5400');
-  expect(copied).not.toContain('fee');
+  if (canReadClipboard) {
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copied).toContain('#g=12.5&s=5400');
+    expect(copied).not.toContain('fee');
+  }
   expect(errors).toEqual([]);
 });
 
@@ -306,4 +310,10 @@ test('sliced Bambu Studio 3MF shows where the filament goes (hq t040)', async ({
   await expect(page.locator('#f-weightG')).toHaveValue('7.3');
   await expect(page.locator('#feature-split-text')).toHaveText(/^supports 4\.2 g \(57%\), walls 1\.5 g/);
   expect(errors).toEqual([]);
+});
+
+test('59 min 50 s shows as 1 h 0 min, not 0 h 60 min (hq t045)', async ({ page }) => {
+  await page.goto('/#s=3590');
+  await expect(page.locator('#f-hours')).toHaveValue('1');
+  await expect(page.locator('#f-mins')).toHaveValue('0');
 });
