@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { computeCost, DEFAULTS } from './cost';
 import { parseGcodeText } from './parsers/gcode';
 import { parseSliceInfo } from './parsers/threemf';
+import { parseFile } from './parsers/index';
 
 // Written by an AI agent (Claude): recomputes the guides' tables from their own stated inputs, so an arithmetic
 // slip or an edited input can't ship (hq t018 found "0.19" where 1 kWh at 0.18 is 0.18).
@@ -142,6 +143,27 @@ describe('slicer metadata guide', () => {
     expect([r.printTimeSeconds, grams(r.filaments)]).toEqual([92579, '94.89']);
     expect(html).toContain(`<strong>${((76525 / 1000) * 1.24).toFixed(2)} g</strong>`);
     expect(html).toContain(`is ${Math.floor(92579 / 3600)} h ${Math.floor((92579 % 3600) / 60)} min`);
+  });
+  it('Bambu Studio G-code header: quoted verbatim from our own file, parses to what the text says (hq t054)', async () => {
+    const dir = 'test-corpus/slicer-matrix/files/';
+    const file = readFileSync(dir + 'B01_cube.plate_1.gcode', 'utf8');
+    const quoted = pre('Bambu Studio G-code header lines');
+    expect(file.startsWith(quoted + '\n')).toBe(true);
+    const r = await parseFile(new Uint8Array(readFileSync(dir + 'B01_cube.plate_1.gcode')));
+    expect([r.printTimeSeconds, grams(r.filaments)]).toEqual([527, '3.74']);
+    expect(html).toContain(`(${Math.floor(527 / 60)} min ${527 % 60} s here)`);
+    // The "[cm^3]" figure is really mm³: length × filament cross-section, on three files.
+    const area = Math.PI * 0.875 ** 2;
+    for (const f of ['B01_cube', 'B02_petg', 'B04_supports']) {
+      const g = readFileSync(`${dir}${f}.plate_1.gcode`, 'utf8');
+      const len = parseFloat(g.match(/^; total filament length \[mm\] : ([\d.]+)$/m)![1]);
+      const vol = parseFloat(g.match(/^; total filament volume \[cm\^3\] : ([\d.]+)$/m)![1]);
+      expect(Math.abs(vol / (len * area) - 1)).toBeLessThan(0.001);
+    }
+    const mm3 = 1232.42 * area;
+    expect(html).toContain(`is ${Math.round(mm3)} mm³, which is ${(mm3 / 1000).toFixed(2)} cm³`);
+    expect(html).toContain(`3.74 g is ${(mm3 / 1000).toFixed(2)} cm³ at PLA's 1.26 g/cm³`);
+    expect(Math.abs((mm3 / 1000) * 1.26 - 3.74)).toBeLessThan(0.01);
   });
   it('Bambu slice_info', () => {
     const r = parseSliceInfo(`<plate>${pre('Bambu Studio slice_info.config lines')}</plate>`);

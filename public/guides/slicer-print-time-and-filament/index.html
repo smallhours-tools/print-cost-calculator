@@ -14,7 +14,7 @@
   <meta property="og:site_name" content="Small Hours">
   <meta property="og:image" content="https://smallhourstools.com/print-cost-calculator/og.png">
   <meta name="twitter:card" content="summary_large_image">
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Where to find print time and filament weight in G-code and 3MF files", "description": "Where PrusaSlicer, OrcaSlicer, Cura and Bambu Studio write the estimated print time and filament use inside G-code, .bgcode and 3MF files, with the exact lines from real files and how to turn length or volume into grams.", "url": "https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-10", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Where to find print time and filament weight in G-code and 3MF files", "description": "Where PrusaSlicer, OrcaSlicer, Cura and Bambu Studio write the estimated print time and filament use inside G-code, .bgcode and 3MF files, with the exact lines from real files and how to turn length or volume into grams.", "url": "https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/", "mainEntityOfPage": "https://smallhourstools.com/print-cost-calculator/guides/slicer-print-time-and-filament/", "image": "https://smallhourstools.com/print-cost-calculator/og.png", "datePublished": "2026-10-10", "dateModified": "2026-10-11", "author": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}, "publisher": {"@type": "Organization", "name": "Small Hours", "url": "https://smallhourstools.com/"}}</script>
   <style>
     :root{--bg:#fff;--fg:#1b1d22;--mut:#5a6070;--card:#f4f5f8;--acc:#2a5bd7;--bd:#d5d8e0}
     @media (prefers-color-scheme:dark){:root{--bg:#12141a;--fg:#e8eaf0;--mut:#9aa1b2;--card:#1c1f28;--acc:#7fa2ff;--bd:#343949}}
@@ -44,6 +44,18 @@
 ; estimated printing time (normal mode) = 1h 20m 43s</pre>
     <p>OrcaSlicer writes the same keys (it descends from PrusaSlicer) and also repeats the print time near the top of the file. With several extruders, each line holds one value per extruder, separated by commas.</p>
     <p class="note">Watch out: if the filament profile has no density set, the slicer writes <code>filament used [g] = 0.00</code>. Then multiply the <code>[cm3]</code> figure by your filament's density (see <a href="../filament-cost-per-gram/">filament cost per gram</a>).</p>
+
+    <h2>Bambu Studio G-code</h2>
+    <p>Bambu Studio puts its totals at the <strong>top</strong> of a plain G-code export, in a block between <code>HEADER_BLOCK_START</code> and <code>HEADER_BLOCK_END</code>. This is from a cube we sliced in Bambu Studio 02.08 for our test files:</p>
+    <pre tabindex="0" aria-label="Bambu Studio G-code header lines">; HEADER_BLOCK_START
+; BambuStudio 02.08.02.61
+; model printing time: 8m 46s; total estimated time: 8m 47s
+; total layer number: 100
+; total filament length [mm] : 1232.42
+; total filament volume [cm^3] : 2964.32
+; total filament weight [g] : 3.74</pre>
+    <p>The calculator uses <code>total estimated time</code> (8 min 47 s here), the longer of the two times on that line. With several filaments, the length, volume and weight lines hold one value per filament, separated by commas.</p>
+    <p class="note">Watch out: the volume line says cm³, but the number is in mm³. 1232.42 mm of 1.75 mm filament is 2964 mm³, which is 2.96 cm³. The weight line is the one to trust: 3.74 g is 2.96 cm³ at PLA's 1.26 g/cm³.</p>
 
     <h2>PrusaSlicer binary G-code (.bgcode)</h2>
     <p>Newer Prusa printers use binary G-code. It holds the same keys as above, but in compressed metadata blocks at the <strong>start</strong> of the file, so a text editor shows nothing useful. Open it in PrusaSlicer's G-code viewer, or drop it into the <a href="../../">calculator</a>, which reads those blocks in your browser.</p>
@@ -89,6 +101,7 @@
         <thead><tr><th scope="col">File</th><th scope="col">Time</th><th scope="col">Filament</th></tr></thead>
         <tbody>
           <tr><th scope="row">PrusaSlicer / OrcaSlicer G-code</th><td>end: h m s</td><td>end: mm, cm³, g</td></tr>
+          <tr><th scope="row">Bambu Studio G-code</th><td>top: h m s</td><td>top: mm, g</td></tr>
           <tr><th scope="row">PrusaSlicer .bgcode</th><td>start, binary</td><td>start, binary</td></tr>
           <tr><th scope="row">Cura, Marlin flavor</th><td>top: seconds</td><td>top: meters</td></tr>
           <tr><th scope="row">Cura, Griffin flavor</th><td>top: seconds</td><td>top: mm³</td></tr>
@@ -106,12 +119,13 @@
     <ul>
       <li>PrusaSlicer: <code>test.gcode</code> from <a href="https://github.com/prusa3d/PrusaSlicer/tree/master/resources/test_data">PrusaSlicer, resources/test_data</a> (PrusaSlicer 2.9.0); the .bgcode description follows the <a href="https://github.com/prusa3d/libbgcode">libbgcode</a> specification.</li>
       <li>OrcaSlicer: <code>orcaslicer.gcode</code> from <a href="https://github.com/mjonuschat/acceleration-control">mjonuschat/acceleration-control</a>, GCode folder.</li>
+      <li>Bambu Studio G-code: <code>B01_cube.plate_1.gcode</code>, a file we sliced ourselves for testing, in the calculator's <a href="https://github.com/smallhours-tools/print-cost-calculator/tree/main/test-corpus/slicer-matrix">test-corpus/slicer-matrix</a> folder.</li>
       <li>Cura (Marlin): <code>xyzCalibration_cube.gcode</code> from <a href="https://github.com/YouMakeTech/klipper-ender3">YouMakeTech/klipper-ender3</a>, demo folder (Cura 4.11).</li>
       <li>Cura (Griffin): <code>simple.gcode</code> from <a href="https://github.com/Ultimaker/GHermeneus/tree/master/resources">Ultimaker/GHermeneus, resources</a> (Cura 4.7).</li>
       <li>Bambu Studio: <code>cube_h2c.gcode.3mf</code> from <a href="https://github.com/MichaelDanCurtis/BambuMate/tree/main/src-tauri/tests/fixtures/slicer">MichaelDanCurtis/BambuMate, test fixtures</a> (Bambu Studio 02.08).</li>
       <li>PLA densities: see <a href="../filament-cost-per-gram/">filament cost per gram</a>.</li>
     </ul>
-    <p class="note">Lines checked against the files on 10 October 2026. Written by an AI agent (Claude).</p>
+    <p class="note">Lines checked against the files on 11 October 2026. Written by an AI agent (Claude).</p>
   </main>
   <footer><p>Built and maintained by an AI agent (Claude), with human oversight. A <strong>Small Hours</strong> tool. No ads, no cookies. Page views are counted with Cloudflare Web Analytics.</p></footer>
   <!-- Cloudflare Web Analytics: cookieless page-view counts (owner-approved 2026-10-09) --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b74b89d0212e4a62b6a1f6f48c252d74"}'></script><!-- End Cloudflare Web Analytics -->
