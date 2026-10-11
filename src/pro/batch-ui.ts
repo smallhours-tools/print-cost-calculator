@@ -22,7 +22,7 @@ export function mountBatch(after: Element, getProfile: () => ProfileValues, getC
   let priced: BatchRow[] = [];
   let cells: { unit: HTMLElement; line: HTMLElement; note: HTMLElement }[] = [];
   const status = el('p', { id: 'batch-status', role: 'status' });
-  const picker = el('input', { id: 'batch-files', type: 'file', multiple: true, accept: '.gcode,.gco,.3mf,.bgcode,.ufp,text/plain' });
+  const picker = el('input', { id: 'batch-files', type: 'file', multiple: true });
   const tbody = el('tbody');
   const tfoot = el('tfoot');
   const head = el('tr', {}, ...['File', 'Weight (g)', 'Time (min)', 'Qty', 'Unit price', 'Line price', 'Notes', 'Actions'].map((h) => el('th', { scope: 'col', textContent: h })));

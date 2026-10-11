@@ -65,9 +65,10 @@ function render() {
 }
 
 function setTime(seconds?: number) {
-  const h = seconds ? Math.floor(seconds / 3600) : 0;
-  $<HTMLInputElement>('f-hours').value = String(h);
-  $<HTMLInputElement>('f-mins').value = seconds ? String(Math.round((seconds % 3600) / 60)) : '0';
+  // Round to whole minutes first, so 59 min 40 s shows as 1 h 0 min, not 0 h 60 min.
+  const mins = seconds ? Math.round(seconds / 60) : 0;
+  $<HTMLInputElement>('f-hours').value = String(Math.floor(mins / 60));
+  $<HTMLInputElement>('f-mins').value = String(mins % 60);
 }
 
 /** Offer the manufacturer's average power for the file's printer, unless the power setting already matches it. */
@@ -129,6 +130,10 @@ async function handleFile(file: File) {
     showFeatureSplit(bytes, parsed).catch(() => { /* unreadable G-code blocks: the split just stays hidden */ });
   } catch (e) {
     $('power-hint').hidden = true;
+    // Don't leave the previous file's numbers priced under a message that says to enter them.
+    input('weightG').value = '';
+    setTime();
+    render();
     const msg = e instanceof Error ? e.message : '';
     // Messages written as full sentences (e.g. "This project hasn't been sliced...") read better on their own.
     status.textContent = /[.!?]$/.test(msg)
