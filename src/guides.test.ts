@@ -213,6 +213,10 @@ describe('infill guide', () => {
     .filter((l) => /^\| \S+\.gcode \|/.test(l))
     .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()))
     .map(([file, infill, stated, ...rest]) => ({ file, infill, stated: +stated, parts: rest.slice(0, 4).map(Number), grams: +rest[4] }));
+  it('the CTA names every file type the calculator splits (hq t053)', () => {
+    const cta = html.split('<div class="cta">')[1].split('</div>')[0];
+    for (const t of ['PrusaSlicer', 'OrcaSlicer', 'Bambu Studio', '.bgcode', '.3mf', 'single-filament']) expect(cta).toContain(t);
+  });
   const share = (r: (typeof ref)[0], i: number) => r.parts[i] / r.parts.reduce((s, v) => s + v, 0);
   it('reference totals match the stated lengths', () => {
     expect(ref.length).toBe(7);
