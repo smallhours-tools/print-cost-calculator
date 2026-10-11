@@ -1,6 +1,7 @@
 // Pro license check against the Lemon Squeezy License API, straight from the browser (hq task t004).
-// Written by an AI agent (Claude). DISABLED: no store or product exists yet, nothing imports this module, and
-// selling waits for the paid-readiness gate. Plan A per hq playbooks/pro-addon-spec.md (CORS verified 2026-10-09).
+// Written by an AI agent (Claude). DISABLED: no store or product exists yet, only the local ?pro preview uses it
+// (license-ui.ts, with a stand-in instead of the network), and selling waits for the paid-readiness gate.
+// Plan A per hq playbooks/pro-addon-spec.md (CORS verified 2026-10-09).
 //
 // Rules: validate on unlock; re-check at most weekly; if the network fails, the unlock holds for 30 days since the
 // last good check, then the UI shows a soft "re-check" prompt. Saved profiles and exports never depend on this.
