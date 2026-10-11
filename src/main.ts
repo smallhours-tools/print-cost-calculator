@@ -206,10 +206,18 @@ function init() {
   if (job.seconds !== undefined) setTime(job.seconds);
   render();
   if (proPreviewEnabled(location)) {
-    import('./pro/batch-ui').then(({ mountBatch }) => mountBatch(
-      $('res').parentElement!, read, () => $<HTMLInputElement>('f-currency').value.trim().slice(0, 4),
-      (cb) => document.querySelectorAll('#calc input').forEach((el) => el.addEventListener('input', cb)),
-    ));
+    // hq t050: batch pricing and quotes need an unlocked license; saved libraries (below) never do.
+    let batchMounted = false;
+    import('./pro/license-ui').then(({ mountLicense, isUnlocked }) => mountLicense($('res').parentElement!, (status) => {
+      const batch = document.getElementById('pro-batch');
+      if (batch) batch.hidden = !isUnlocked(status);
+      if (batchMounted || !isUnlocked(status)) return;
+      batchMounted = true;
+      import('./pro/batch-ui').then(({ mountBatch }) => mountBatch(
+        $('pro-license'), read, () => $<HTMLInputElement>('f-currency').value.trim().slice(0, 4),
+        (cb) => document.querySelectorAll('#calc input').forEach((el) => el.addEventListener('input', cb)),
+      ));
+    }));
     import('./pro/profiles-ui').then(({ mountProfiles }) => mountProfiles(
       input('filamentPricePerKg').closest('fieldset')!, read,
       // Setting values then firing one input event re-renders the result and the batch table.

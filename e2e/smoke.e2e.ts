@@ -62,6 +62,8 @@ test('Pro preview stays closed without ?pro', async ({ page }) => {
 
 test('Pro preview: batch, CSV, hostile names, quote', async ({ page }) => {
   const errors = trackErrors(page);
+  // Batch pricing needs an unlocked license (hq t050): a fresh preview key, no network needed.
+  await page.addInitScript(() => localStorage.setItem('pcc.pro.license.v1', JSON.stringify({ key: 'DEMO-VALID', validatedAt: Date.now() })));
   await page.goto('/?pro');
   await page.setInputFiles('#batch-files', [
     file('a.gcode', gcode(12.08, '54m 11s')),
@@ -323,6 +325,7 @@ test('59 min 50 s shows as 1 h 0 min, not 0 h 60 min (hq t045)', async ({ page }
 test('file pickers have no accept filter, so iPhones can pick .gcode/.bgcode/.ufp (hq t045)', async ({ page }) => {
   // iOS Safari greys out files whose extension it can't map to a known type when accept= lists extensions.
   // The parsers detect the format from the bytes, and anything else gets a plain message.
+  await page.addInitScript(() => localStorage.setItem('pcc.pro.license.v1', JSON.stringify({ key: 'DEMO-VALID', validatedAt: Date.now() })));
   await page.goto('/?pro');
   await expect(page.locator('#file')).not.toHaveAttribute('accept', /./);
   await expect(page.locator('#batch-files')).not.toHaveAttribute('accept', /./);
