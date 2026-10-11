@@ -8,7 +8,10 @@ import { implausibleTotals } from './sanity';
 export type { ParsedFile, FilamentUsage, Slicer } from './types';
 export { ParseError } from './types';
 
-const MAX_FILE_BYTES = 512 * 1024 * 1024;
+export const MAX_FILE_BYTES = 512 * 1024 * 1024;
+export const TOO_LARGE = 'This file is larger than 512 MB, too big to read in the browser.';
+/** Plain G-code keeps its totals near the start and end; only this much of each end is read (hq t046). */
+export const GCODE_END_BYTES = 400_000;
 
 /** Detect file type by content and parse it. Throws ParseError on unusable input. */
 export async function parseFile(bytes: Uint8Array): Promise<ParsedFile> {
@@ -18,12 +21,12 @@ export async function parseFile(bytes: Uint8Array): Promise<ParsedFile> {
 }
 
 async function parseAny(bytes: Uint8Array): Promise<ParsedFile> {
-  if (bytes.length > MAX_FILE_BYTES) throw new ParseError('File is too large');
+  if (bytes.length > MAX_FILE_BYTES) throw new ParseError(TOO_LARGE);
   if (bytes.length === 0) throw new ParseError('This file is empty.');
   if (bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b) return parse3mf(bytes);
   if (isBgcode(bytes)) return parseBgcode(bytes);
   // G-code: only the head and tail matter, so avoid decoding huge files in full.
-  const CHUNK = 400_000;
+  const CHUNK = GCODE_END_BYTES;
   const dec = new TextDecoder();
   const text =
     bytes.length > 2 * CHUNK
