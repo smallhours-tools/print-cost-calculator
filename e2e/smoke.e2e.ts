@@ -317,3 +317,11 @@ test('59 min 50 s shows as 1 h 0 min, not 0 h 60 min (hq t045)', async ({ page }
   await expect(page.locator('#f-hours')).toHaveValue('1');
   await expect(page.locator('#f-mins')).toHaveValue('0');
 });
+
+test('file pickers have no accept filter, so iPhones can pick .gcode/.bgcode/.ufp (hq t045)', async ({ page }) => {
+  // iOS Safari greys out files whose extension it can't map to a known type when accept= lists extensions.
+  // The parsers detect the format from the bytes, and anything else gets a plain message.
+  await page.goto('/?pro');
+  await expect(page.locator('#file')).not.toHaveAttribute('accept', /./);
+  await expect(page.locator('#batch-files')).not.toHaveAttribute('accept', /./);
+});
