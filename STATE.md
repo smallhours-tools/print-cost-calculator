@@ -5,6 +5,10 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 ## NEEDS_OWNER
 - None (Pages is live and private vulnerability reporting is enabled, both checked 2026-10-10).
 
+## Run 2026-10-12 (06:00 UTC, Opus)
+- hq t057 (#78): README links the live tool, guides index and accuracy page and names .gcode/.bgcode/.3mf/.ufp; src/readme.test.ts takes the extensions from the index.html file-input label (mutation: dropping .ufp fails).
+- hq t058 (#79): accuracy page shows per-filament weights on multi-filament rows and 'yes (rounding)' where the read weight differs from the slicer's total within 0.01 g, plus one note. `CorpusRow.statedFilamentG` from the manifest; test asserts the marker per row from the numbers.
+
 ## Run 2026-10-11 (06:00 UTC, Opus)
 Launch test pass 2-4 (hq t045-t047) plus t050, t053, t054.
 - t045 (#69, #73): e2e/corpus-ui.e2e.ts puts real corpus files through the page (displayed weight/time = manifest, price shown) and checks rejections (project 3MFs, STL, empty). Projects: chromium + pixel-7 always; firefox, webkit, iphone-13 with `E2E_ALL_BROWSERS=1`. CI turns that on only once PR #70 (ci.yml, owner merge) lands; its run is green on all five. Fixes: a rejected file no longer leaves the previous price; 59:50 shows as 1 h 0 min; non-sliced/empty files get one sentence; no `accept=` on file inputs (iOS greys out unknown extensions). WebKit reports the blocked analytics beacon as a page error offline, so e2e stubs cloudflareinsights.com.
