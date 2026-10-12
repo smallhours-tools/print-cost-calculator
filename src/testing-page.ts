@@ -12,6 +12,8 @@ export interface CorpusRow {
   statedTimeS: number | null;
   statedLengthMm?: number | number[] | null;
   statedVolumeMm3?: number | number[] | null;
+  /** The slicer's per-filament weights, when it states them (multi-filament prints). */
+  statedFilamentG?: number[] | null;
   readWeightG?: number;
   readTimeS?: number;
   weightEstimated?: boolean;
@@ -40,6 +42,14 @@ export function fmtTime(s: number): string {
 
 export const weightOk = (r: CorpusRow) => r.statedWeightG !== null && r.readWeightG !== undefined && Math.abs(r.readWeightG - r.statedWeightG) <= 0.01 + 1e-9;
 export const timeOk = (r: CorpusRow) => r.statedTimeS !== null && r.readTimeS !== undefined && Math.abs(r.readTimeS - r.statedTimeS) <= 1;
+
+/**
+ * True when the read weight matches the slicer's total only within the 0.01 g tolerance (hq t058): on
+ * multi-filament prints the slicer's total and the sum of its rounded per-filament weights can differ by
+ * 0.01 g, and the calculator adds the per-filament weights.
+ */
+export const roundingGap = (r: CorpusRow) => !r.reject && weightOk(r) && Math.abs(r.readWeightG! - r.statedWeightG!) > 1e-9;
+export const ROUNDING_MARK = 'yes (rounding)';
 
 /** One passing verdict per row, the same rules as src/corpus.test.ts. */
 export function rowOk(r: CorpusRow): boolean {
@@ -83,10 +93,10 @@ function cells(r: CorpusRow): [string, string, string] {
   if (!r.committed) return [r.statedTimeS !== null ? `${fmtTime(r.statedTimeS)}, ${r.statedWeightG} g` : '', 'not checked automatically (over 3 MB, not in the repository)', '–'];
   if (r.reject) return ['unsliced project', r.rejected ? 'refused: “slice it first”' : 'not refused', rowOk(r) ? 'yes' : 'NO'];
   const said = r.statedWeightG !== null
-    ? `${fmtTime(r.statedTimeS!)}, ${r.statedWeightG.toFixed(2)} g`
+    ? `${fmtTime(r.statedTimeS!)}, ${r.statedWeightG.toFixed(2)} g${(r.statedFilamentG?.length ?? 0) > 1 ? ` (${r.statedFilamentG!.map((g) => g.toFixed(2)).join(' + ')})` : ''}`
     : `${fmtTime(r.statedTimeS!)}, ${r.statedLengthMm ? `${amounts(r.statedLengthMm)} mm of filament` : `${amounts(r.statedVolumeMm3 ?? [])} mm³ of filament`}`;
   const read = r.readTimeS === undefined ? 'nothing' : `${fmtTime(r.readTimeS)}, ${r.readWeightG?.toFixed(2)} g${r.weightEstimated ? ' (estimated)' : ''}`;
-  return [said, read, rowOk(r) ? 'yes' : 'NO'];
+  return [said, read, rowOk(r) ? (roundingGap(r) ? ROUNDING_MARK : 'yes') : 'NO'];
 }
 
 export function renderTestingPage(d: PageData): string {
@@ -151,7 +161,8 @@ export function renderTestingPage(d: PageData): string {
 ${rows}
         </tbody>
       </table>
-    </section>
+    </section>${d.rows.some((r) => r.committed && roundingGap(r)) ? `
+    <p>"${ROUNDING_MARK}": for prints with more than one filament the slicer states a total and a weight per filament, each rounded to 0.01 g, so the total and the sum of the per-filament weights can differ by 0.01 g. The calculator adds the per-filament weights.</p>` : ''}
 
     <h2>Slicers and settings</h2>
     <ul>
