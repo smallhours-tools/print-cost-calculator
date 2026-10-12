@@ -5,7 +5,7 @@ import { execSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseFile, ParseError } from './parsers/index';
-import { faqAnswer, headline, renderTestingPage, rowOk, type CorpusRow, type PageData } from './testing-page';
+import { faqAnswer, headline, renderTestingPage, ROUNDING_MARK, rowOk, type CorpusRow, type PageData } from './testing-page';
 
 const DIR = 'test-corpus/slicer-matrix/';
 const PAGE = 'public/testing/index.html';
@@ -16,7 +16,7 @@ const PROJECT: Record<string, string> = {
 
 interface Entry {
   file: string; committed: boolean; expect: 'parse' | 'reject'; reject_message: string | null;
-  stated_weight_g: number | null; stated_time_s: number | null; stated_length_mm?: number | number[]; stated_volume_mm3?: number | number[];
+  stated_weight_g: number | null; stated_time_s: number | null; stated_length_mm?: number | number[]; stated_volume_mm3?: number | number[]; stated_filament_g?: number[];
 }
 
 async function corpusRows(entries: Entry[]): Promise<CorpusRow[]> {
@@ -25,6 +25,7 @@ async function corpusRows(entries: Entry[]): Promise<CorpusRow[]> {
     const row: CorpusRow = {
       file: e.file, slicer: SLICER[e.file[0]], committed: e.committed, reject: e.expect === 'reject',
       statedWeightG: e.stated_weight_g, statedTimeS: e.stated_time_s, statedLengthMm: e.stated_length_mm ?? null, statedVolumeMm3: e.stated_volume_mm3 ?? null,
+      statedFilamentG: e.stated_filament_g ?? null,
     };
     if (e.committed) {
       try {
@@ -92,6 +93,14 @@ describe('public testing page', () => {
     expect(d.rows.filter((r) => r.committed && !rowOk(r)).map((r) => r.file)).toEqual([]);
     expect(d.publicFiles).toBeGreaterThan(10);
     expect(d.largeFiles.length).toBe(3);
+
+    // hq t058: a row whose read weight differs from the slicer's total (within tolerance) says why; equal rows don't.
+    const cell = (file: string) => html.match(new RegExp(`<code>${file.replace(/\./g, '\\.')}</code></th>(?:<td>.*?</td>){3}<td>(.*?)</td>`))?.[1];
+    const weighed = d.rows.filter((r) => r.committed && !r.reject && r.statedWeightG !== null);
+    const gaps = weighed.filter((r) => Math.abs(r.readWeightG! - r.statedWeightG!) > 1e-9);
+    expect(gaps.length).toBeGreaterThan(0);
+    for (const r of weighed) expect(cell(r.file), r.file).toBe(gaps.includes(r) ? ROUNDING_MARK : 'yes');
+    expect(html).toContain(`<p>"${ROUNDING_MARK}": for prints with more than one filament`);
 
     // The calculator FAQ carries the same headline, in the visible text and its JSON-LD twin.
     const index = readFileSync('index.html', 'utf8');
