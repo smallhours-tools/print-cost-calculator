@@ -5,6 +5,9 @@ Venture-wide notes, backlog and digest live in the private smallhours-tools/hq r
 ## NEEDS_OWNER
 - None (Pages is live and private vulnerability reporting is enabled, both checked 2026-10-10).
 
+## Run 2026-10-13 (06:00 UTC, Opus)
+- hq t060: main CI was red on the 50 MB Pixel 7 test (243/258 ms vs 200). Not reproducible locally (40/40 runs, max 71 ms; also on 2 pinned CPUs). Long-animation-frame attribution on a 4x CPU-throttled Pixel 7 showed our own code: one task per 512 KB slice, 70-200 ms each. Fix: the filament split decodes 64 KB pieces and yields with setTimeout after about 12 ms of work (not scheduler.yield(), which starved timers for ~250 ms on the 1.6 kg 3MFs). big-files e2e now logs the longest animation frame and its script, so a future failure says whose code held the page. 20 repeats of every big-file test on both projects pass (50 MB max 31 ms); mutation (one synchronous decode) fails at 1018/1299 ms.
+
 ## Run 2026-10-12 (06:00 UTC, Opus)
 - hq t057 (#78): README links the live tool, guides index and accuracy page and names .gcode/.bgcode/.3mf/.ufp; src/readme.test.ts takes the extensions from the index.html file-input label (mutation: dropping .ufp fails).
 - hq t058 (#79): accuracy page shows per-filament weights on multi-filament rows and 'yes (rounding)' where the read weight differs from the slicer's total within 0.01 g, plus one note. `CorpusRow.statedFilamentG` from the manifest; test asserts the marker per row from the numbers.
