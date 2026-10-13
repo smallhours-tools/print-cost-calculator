@@ -107,27 +107,46 @@ export function featureLengthsFromBytes(bytes: Uint8Array, chunk = 4 << 20): Par
 }
 
 /**
- * Same again, but hands the main thread back between chunks (hq t046): a 50 MB file used to block the page
- * for over 2 s. 1 MB chunks take roughly 40 ms each in Chromium.
+ * Hands the main thread back between pieces of work (hq t046, t060). A piece is 64 KB of text; after about
+ * 12 ms of work the loop yields, so even a phone-speed CPU never blocks the page for long. t060 measured
+ * the old one-task-per-512 KB-slice loop at 70-200 ms per task on a 4x throttled Pixel 7 emulation.
+ * setTimeout, not scheduler.yield(): Chromium runs yield() continuations ahead of timers, which starved the
+ * page's own timers for about 250 ms on a 1.6 kg Bambu 3MF even though no single task was long.
  */
-export async function featureLengthsFromBytesAsync(bytes: Uint8Array, chunk = 1 << 20): Promise<Partial<Record<FeatureGroup, number>>> {
-  const dec = new TextDecoder();
-  const c = new FeatureCounter();
-  for (let i = 0; i < bytes.length; i += chunk) {
-    c.push(dec.decode(bytes.subarray(i, i + chunk), { stream: i + chunk < bytes.length }));
-    await new Promise((r) => setTimeout(r, 0));
+const PIECE = 64 << 10;
+const BUDGET_MS = 12;
+const yieldToPage = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+
+class Feeder {
+  private dec = new TextDecoder();
+  private since = performance.now();
+  readonly counter = new FeatureCounter();
+
+  async feed(bytes: Uint8Array): Promise<void> {
+    for (let i = 0; i < bytes.length; i += PIECE) {
+      this.counter.push(this.dec.decode(bytes.subarray(i, i + PIECE), { stream: true }));
+      if (performance.now() - this.since > BUDGET_MS) { await yieldToPage(); this.since = performance.now(); }
+    }
   }
-  return c.lengths();
+
+  lengths(): Partial<Record<FeatureGroup, number>> {
+    this.counter.push(this.dec.decode());
+    return this.counter.lengths();
+  }
+}
+
+/** Same again, but without blocking the page (see Feeder); `chunk` only sets how much is handed over at once. */
+export async function featureLengthsFromBytesAsync(bytes: Uint8Array, chunk = 1 << 20): Promise<Partial<Record<FeatureGroup, number>>> {
+  const f = new Feeder();
+  for (let i = 0; i < bytes.length; i += chunk) await f.feed(bytes.subarray(i, i + chunk));
+  return f.lengths();
 }
 
 /** Same, streamed from a File/Blob in 512 KB slices so the whole file is never in memory at once (hq t046). */
 export async function featureLengthsFromBlob(blob: Blob, chunk = 512 << 10): Promise<Partial<Record<FeatureGroup, number>>> {
-  const dec = new TextDecoder();
-  const c = new FeatureCounter();
-  for (let i = 0; i < blob.size; i += chunk) {
-    c.push(dec.decode(new Uint8Array(await blob.slice(i, i + chunk).arrayBuffer()), { stream: i + chunk < blob.size }));
-  }
-  return c.lengths();
+  const f = new Feeder();
+  for (let i = 0; i < blob.size; i += chunk) await f.feed(new Uint8Array(await blob.slice(i, i + chunk).arrayBuffer()));
+  return f.lengths();
 }
 
 const LABELS: Record<FeatureGroup, string> = {

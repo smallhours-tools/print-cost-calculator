@@ -42,10 +42,23 @@ for (const mb of SIZES) {
     await page.route(/cloudflareinsights\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
     await page.goto('/');
     // A 20 ms ticker: the largest gap between ticks is the longest time the page could not respond.
+    // Where the browser supports it, also record the longest animation frame and which script ran in it
+    // (hq t060), so a failure says whether our code or something else (e.g. a busy CI runner) held the page.
     await page.evaluate(() => {
-      const w = window as unknown as { maxGap: number; last: number };
-      w.maxGap = 0; w.last = performance.now();
+      const w = window as unknown as { maxGap: number; last: number; loaf: string };
+      w.maxGap = 0; w.last = performance.now(); w.loaf = 'n/a';
       setInterval(() => { const t = performance.now(); w.maxGap = Math.max(w.maxGap, t - w.last - 20); w.last = t; }, 20);
+      if (!PerformanceObserver.supportedEntryTypes?.includes('long-animation-frame')) return;
+      w.loaf = 'none over 50 ms';
+      let longest = 0;
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries() as (PerformanceEntry & { scripts: { invoker: string; sourceURL: string; duration: number }[] })[]) {
+          if (e.duration <= longest) continue;
+          longest = e.duration;
+          const s = e.scripts.map((x) => `${x.invoker} ${x.sourceURL.split('/').pop()} ${Math.round(x.duration)} ms`).join('; ');
+          w.loaf = `${Math.round(e.duration)} ms at ${Math.round(e.startTime)} ms (${s || 'no script'})`;
+        }
+      }).observe({ type: 'long-animation-frame' });
     });
     const t0 = Date.now();
     await page.setInputFiles('#file', path);
@@ -57,8 +70,9 @@ for (const mb of SIZES) {
     if (mb <= 64) await expect(page.locator('#feature-split')).toBeVisible({ timeout: 60_000 });
     else await expect(page.locator('#file-status')).toContainText('over 64 MB, so the walls/infill split is skipped');
     const doneMs = Date.now() - t0;
-    const maxGap = await page.evaluate(() => (window as unknown as { maxGap: number }).maxGap);
-    console.log(`[t046] ${browserName} ${mb} MB: numbers shown after ${shownMs} ms, split done after ${doneMs} ms (incl. file transfer), longest block ${Math.round(maxGap)} ms`);
+    await page.waitForTimeout(100); // performance entries are delivered asynchronously
+    const { maxGap, loaf } = await page.evaluate(() => { const w = window as unknown as { maxGap: number; loaf: string }; return { maxGap: w.maxGap, loaf: w.loaf }; });
+    console.log(`[t046] ${browserName} ${mb} MB: numbers shown after ${shownMs} ms, split done after ${doneMs} ms (incl. file transfer), longest block ${Math.round(maxGap)} ms; longest frame ${loaf}`);
     expect(maxGap).toBeLessThan(MAX_BLOCK_MS);
   });
 }
