@@ -86,8 +86,12 @@ Done: removed BACKLOG.md, added parsers + 10 tests (@types/node pinned for the t
 Done: first run. Created STATE/BACKLOG, scaffold (Vite + TS + Vitest, README with AI disclosure + support policy, MIT LICENSE, SECURITY.md, CI and Pages deploy workflows, placeholder page with AI-disclosure footer). Tests and build pass. No issues or PRs were open.
 
 ## Roadmap
-1. Scaffold — DONE (PR #1 merged).
-2. Parsers — DONE in src/parsers (G-code: Prusa/Orca/Bambu/Cura; 3MF: slice_info.config + plate gcode fallback; own minimal zip reader using DecompressionStream; multi-filament; weight estimated from length when absent). Fixtures are synthetic; real-world sample files would improve confidence (owner-cleared issue with a sample is the way to get them).
-   Next: wire parseFile() into UI (file drop) as part of step 3.
-3. Cost model + UI — DONE (single saved settings profile, currency symbol). Possible later: named presets, a11y audit, test with real slicer files.
-4. SEO — explainer + FAQ + canonical done. sitemap.xml + FAQ JSON-LD done (robots.txt lives on the root domain only). og:image DONE 2026-10-10. TODO: link home page card once tool is published (owner decides).
+Status of each area as of 2026-10-13. Details are in the run notes above.
+1. Scaffold, CI and deploy: DONE (#1, #22).
+2. Parsers: DONE. G-code (PrusaSlicer, OrcaSlicer, Bambu Studio, Cura), .bgcode, 3MF (slice_info and plate G-code, zip64, multi-plate), .ufp; printer model, wipe-tower grams, plausibility warnings (#5, #8, #23, #24, #31, #55, #65). Fuzzed in CI (#33, #34).
+3. Real-file testing: DONE. 47 of our own sliced files from 4 slicers are checked against each slicer's numbers in CI and through the page in Chromium and Pixel 7 emulation (#63, #69, #73); large files stay responsive (#74, #81). Firefox, WebKit and iPhone 13 in CI: waiting on the owner's merge of #70.
+4. Cost model and UI: DONE. Material, electricity, wear, labor, fees, suggested price, per-hour line, job links, where the filament goes for G-code, .bgcode and Bambu/Orca 3MFs (#6, #32, #38, #45, #47, #53, #58, #59, #67). Mobile and a11y fixes (#20).
+5. Guides: DONE, 9 live under /guides/ with an index page, every number recomputed by tests (#25, #26, #36, #46, #48, #50, #51, #54, #56, #57). Waiting: Etsy/marketplace guide (hq t011, local), extra-wall cost guide (hq t043 after t051), support guide (hq t052/t055).
+6. Accuracy page: DONE, /testing/ generated from the test data (#76, #79).
+7. SEO: DONE. Explainer, FAQ and Article JSON-LD, sitemap, canonical, og:image (#6, #7, #21, #40). Home page card is live (home repo #5).
+8. Pro add-on: local-only preview DONE (batch and CSV, customer quote, printer/material/shop libraries, license entry on a stand-in client; #14, #15, #17-#19, #27-#31, #75). Waiting: the paid-readiness gate in hq PORTFOLIO.md and an owner-created Lemon Squeezy account before any real unlock.
