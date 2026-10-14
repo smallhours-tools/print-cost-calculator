@@ -157,6 +157,8 @@ async function handleFile(file: File) {
     showFeatureSplit(read, parsed).catch(() => { /* unreadable G-code blocks: the split just stays hidden */ });
   } catch (e) {
     $('power-hint').hidden = true;
+    // Pro preview: drop the previous file's per-slot material rows too.
+    document.dispatchEvent(new CustomEvent('pcc:parsed', { detail: [] }));
     // Don't leave the previous file's numbers priced under a message that says to enter them.
     input('weightG').value = '';
     setTime();
