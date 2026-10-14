@@ -5,7 +5,7 @@ import type { ProfileValues } from './profiles';
 import { MAX_IMPORT_BYTES } from './profiles';
 import {
   blendMaterials, emptyLibrary, exportLibrary, importLibrary, removeItem, suggestMaterial, suggestPrinter, upsertItem, MATERIAL_KEYS,
-  PRINTER_KEYS, SHOP_KEYS, type Kind, type Library, type MaterialItem,
+  PRINTER_KEYS, SHOP_KEYS, type Kind, type Library,
 } from './library';
 
 const STORE = 'pcc.pro.library.v2';
@@ -140,26 +140,68 @@ export function mountProfiles(fieldset: HTMLElement, read: () => ProfileValues, 
     printerStatus.textContent = `Matched printer "${p.name}"${from}. Pick another if that's wrong.`;
   });
 
-  // Preselect saved materials from the file's filament types. Several filaments: blend by weight.
+  // Preselect saved materials from the file's filament types. Several filaments: one picker per slot, blended by
+  // weight (hq t062). A slot with no saved material is priced at the form's own material fields ("base").
+  const slotBox = mk('div', { id: 'p-slots' });
+  status.before(slotBox);
+  type MatVals = Pick<ProfileValues, (typeof MATERIAL_KEYS)[number]>;
+  const matVals = (v: ProfileValues): MatVals => ({ filamentPricePerKg: v.filamentPricePerKg, wastePct: v.wastePct });
+  const same = (a: MatVals, b: MatVals) => a.filamentPricePerKg === b.filamentPricePerKg && a.wastePct === b.wastePct;
+  let base: MatVals | undefined; // the form's material fields before we wrote a blend
+  let lastBlend: MatVals | undefined; // what we wrote; if the form still shows it, the base hasn't changed
+  const formBase = () => {
+    const now = matVals(read());
+    return base && lastBlend && same(now, lastBlend) ? base : now;
+  };
+  // Remove the slot rows; put the form's own price back if it still shows our blend.
+  const clearSlots = () => {
+    if (base && lastBlend && same(matVals(read()), lastBlend)) write(base);
+    base = lastBlend = undefined;
+    slotBox.replaceChildren();
+  };
+  box.querySelector<HTMLSelectElement>('#p-material')!.addEventListener('change', () => { base = lastBlend = undefined; slotBox.replaceChildren(); });
+  const grams = (g?: number) => (g === undefined ? 'weight unknown' : `${Math.round(g * 100) / 100} g`);
+
   document.addEventListener('pcc:parsed', (e) => {
     const filaments = ((e as CustomEvent).detail ?? []) as FilamentUsage[];
-    const slots = filaments.map((f) => ({ weightG: f.weightG, material: suggestMaterial(lib, f) }));
-    const matched = slots.filter((s): s is { weightG: number | undefined; material: MaterialItem } => !!s.material);
-    if (!matched.length) return;
-    const names = [...new Set(matched.map((s) => s.material.name))];
-    const select = box.querySelector<HTMLSelectElement>('#p-material')!;
-    if (names.length === 1) {
-      const m = matched[0].material;
-      picked.materials = m.name; save(); fills[1]();
-      write(m.values);
-      status.textContent = `Matched material "${m.name}" from the file's filament type. Pick another if that's wrong.`;
-      return;
-    }
-    const blend = blendMaterials(slots);
-    if (!blend) return;
-    picked.materials = undefined; save(); fills[1]();
-    select.value = '';
-    write(blend);
-    status.textContent = `Matched ${names.length} materials from the file (${names.map((n) => `"${n}"`).join(', ')}). The material price is their weight-weighted average, with each one's waste included.`;
+    const fallback = formBase();
+    clearSlots();
+    if (filaments.length >= 2 && lib.materials.length) return showSlots(filaments, fallback);
+    const m = filaments.length === 1 ? suggestMaterial(lib, filaments[0]) : undefined;
+    if (!m) return;
+    picked.materials = m.name; save(); fills[1]();
+    write(m.values);
+    status.textContent = `Matched material "${m.name}" from the file's filament type. Pick another if that's wrong.`;
   });
+
+  function showSlots(filaments: FilamentUsage[], fallback: MatVals) {
+    base = fallback;
+    const materialSelect = box.querySelector<HTMLSelectElement>('#p-material')!;
+    picked.materials = undefined; save(); fills[1]();
+    materialSelect.value = '';
+    const selects = filaments.map((f, i) => {
+      const sel = mk('select', { id: `p-slot-${i + 1}` });
+      const hit = suggestMaterial(lib, f)?.name ?? '';
+      const opt = (value: string, t: string) => mk('option', { value, textContent: t, selected: value === hit });
+      sel.replaceChildren(opt('', "Use the form's price"), ...lib.materials.map((m) => opt(m.name, m.name)));
+      sel.addEventListener('change', reblend);
+      slotBox.append(label(`Slot ${i + 1} (${f.type ?? 'type unknown'}, ${grams(f.weightG)})`, sel));
+      return sel;
+    });
+    function reblend() {
+      base = formBase(); // a price typed on the form since the last blend becomes the fallback
+      const slots = filaments.map((f, i) => ({ weightG: f.weightG, material: lib.materials.find((m) => m.name === selects[i].value) }));
+      const used = [...new Set(slots.flatMap((s) => (s.material ? [s.material.name] : [])))];
+      const blend = used.length ? blendMaterials(slots, base) : undefined;
+      lastBlend = blend;
+      write(blend ?? base);
+      const unmatched = filaments.flatMap((f, i) => (slots[i].material ? [] : [`Slot ${i + 1} (${f.type ?? 'type unknown'}, ${grams(f.weightG)})`]));
+      const parts = [used.length
+        ? `Using ${used.map((n) => `"${n}"`).join(', ')} for ${filaments.length - unmatched.length} of ${filaments.length} slots. The material price is the weight-weighted average, with each one's waste included.`
+        : 'No saved material fits these filaments.'];
+      if (unmatched.length) parts.push(`${unmatched.join(', ')} ${unmatched.length === 1 ? 'has' : 'have'} no saved material; ${unmatched.length === 1 ? 'it uses' : 'they use'} the form's price.`);
+      status.textContent = parts.join(' ');
+    }
+    reblend();
+  }
 }

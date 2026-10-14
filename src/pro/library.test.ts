@@ -47,11 +47,22 @@ describe('library', () => {
   it('blends materials per filament slot by weight, with each slot’s waste', () => {
     const lib = sample();
     const [pla, petg] = lib.materials;
-    const b = blendMaterials([{ weightG: 30, material: pla }, { weightG: 10, material: petg }, { weightG: 5 }])!;
-    // (30*15*1.05 + 10*30*1.10) / 40 = (472.5 + 330) / 40
+    const form = { filamentPricePerKg: 20, wastePct: 0 };
+    const b = blendMaterials([{ weightG: 30, material: pla }, { weightG: 10, material: petg }, { material: pla }], form)!;
+    // (30*15*1.05 + 10*30*1.10) / 40 = (472.5 + 330) / 40; the slot without a weight can't be weighted
     expect(b.filamentPricePerKg).toBeCloseTo(20.0625, 6);
     expect(b.wastePct).toBe(0);
-    expect(blendMaterials([{ material: pla }])).toBeUndefined();
+    expect(blendMaterials([{ material: pla }], form)).toBeUndefined();
+  });
+
+  it('prices a slot with no saved material at the form’s price instead of dropping it (hq t062)', () => {
+    const material = { name: 'PETG', values: { filamentPricePerKg: 30, wastePct: 0 } };
+    // 10 g at 30 + 30 g unmatched at the form's 20, no waste: (10*30 + 30*20) / 40 = 22.5
+    expect(blendMaterials([{ weightG: 10, material }, { weightG: 30 }], { filamentPricePerKg: 20, wastePct: 0 })!.filamentPricePerKg).toBeCloseTo(22.5, 9);
+    // The form's waste applies to its slot: (10*30 + 30*20*1.1) / 40 = 24
+    expect(blendMaterials([{ weightG: 10, material }, { weightG: 30 }], { filamentPricePerKg: 20, wastePct: 10 })!.filamentPricePerKg).toBeCloseTo(24, 9);
+    // Nothing matched: the form's own price with its waste folded in.
+    expect(blendMaterials([{ weightG: 10 }, { weightG: 30 }], { filamentPricePerKg: 20, wastePct: 5 })!.filamentPricePerKg).toBeCloseTo(21, 9);
   });
 
   it('suggests a material from the file’s filament type and a printer from a model string', () => {

@@ -52,15 +52,20 @@ export function combine(printer?: PrinterItem, material?: MaterialItem, shop?: S
 
 /**
  * Multi-material: one material per filament slot. Returns the weight-averaged price per kg with each slot's
- * own waste already applied, so wastePct is 0. Slots without a known weight or material are skipped.
+ * own waste already applied, so wastePct is 0. A slot without a material uses `fallback` (the material fields
+ * on the form) so its grams are always priced, never dropped (hq t062). Slots without a known weight are skipped.
  */
-export function blendMaterials(slots: { weightG?: number; material?: MaterialItem }[]): Vals<typeof MATERIAL_KEYS> | undefined {
+export function blendMaterials(
+  slots: { weightG?: number; material?: MaterialItem }[],
+  fallback: Vals<typeof MATERIAL_KEYS>,
+): Vals<typeof MATERIAL_KEYS> | undefined {
   let grams = 0;
   let cost = 0;
   for (const s of slots) {
-    if (!s.material || !isNum(s.weightG) || s.weightG === 0) continue;
+    if (!isNum(s.weightG) || s.weightG === 0) continue;
+    const v = s.material?.values ?? fallback;
     grams += s.weightG;
-    cost += s.weightG * s.material.values.filamentPricePerKg * (1 + s.material.values.wastePct / 100);
+    cost += s.weightG * v.filamentPricePerKg * (1 + v.wastePct / 100);
   }
   return grams > 0 ? { filamentPricePerKg: cost / grams, wastePct: 0 } : undefined;
 }
